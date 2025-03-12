@@ -14,42 +14,35 @@
 .ant-modal-footer {
   margin-top: 0 !important;
 }
-/* 
-:root {
-  --primary-color: #5b2579;
-  --secondary-color: #f6e7ff;
-}
 
-.bg-primary {
-  background-color: var(--primary-color) !important;
-}
-.bg-secondary {
-  background-color: var(--secondary-color) !important;
-}
-
-.text-primary {
-  color: var(--primary-color) !important;
-}
-.text-secondary {
-  background-color: var(--secondary-color) !important;
-} */
-
-/* ant design menu option */
 .ant-menu-light .ant-menu-item {
-  color: #413f3f;
+  color: white !important;
+}
+.ant-menu-light .ant-menu-submenu-title {
+  color: white !important;
 }
 .ant-menu-item:hover {
-  background-color: White !important;
-  color: black !important;
+  background: linear-gradient(to right, #0d60be 50%, #15405d 100%);
+  color: white !important;
 }
 
 .ant-menu-item-selected {
-  background-color: White !important;
-  color: black !important;
-  /* margin: 0 !important;
-  padding: 0 !important; */
+  background: linear-gradient(to right, #0d60be 50%, #15405d 100%);
   border-radius: 0 !important;
+  border-left: 6px solid white !important;
   width: "100%" !important;
+}
+
+.ant-btn:hover,
+.ant-btn:focus {
+  background-color: #165bab !important;
+  border-color: white !important;
+  color: white !important;
+  box-shadow: none !important;
+}
+
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: white !important;
 }
 
 .ant-menu .ant-menu-item .ant-menu-item-icon + span {
@@ -57,7 +50,7 @@
 }
 
 .ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  color: #8b0000 !important;
+  color: white !important;
 }
 
 .ant-menu .ant-menu-title-content {
@@ -65,9 +58,15 @@
 }
 
 .ant-badge .ant-badge-count {
-  background: #ffe7e7 !important;
+  background: #d7e8fd !important;
   color: black !important;
-  border: 1px solid #ffc7c7 !important;
+  border: 1px solid #d7e8fd !important;
+}
+
+.ant-badge .ant-badge-count {
+  background: #d7e8fd !important;
+  color: black !important;
+  border: 1px solid #d7e8fd !important;
 }
 
 .jodit-workplace {
@@ -99,9 +98,16 @@
 /* pagination style */
 .ant-pagination-item-active a {
   color: white !important;
-  background-color: #8b0000 !important;
+  background-color: #15405d !important;
 }
 
 .ant-switch-checked {
-  background-color: #8b0000 !important;
+  background-color: #15405d !important;
 }
+
+/* .sx-react-calendar-wrapper {
+  width: 1200px;
+  max-width: 100vw;
+  height: 800px;
+  max-height: 90vh;
+} */

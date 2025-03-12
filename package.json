@@ -1,5 +1,5 @@
 {
-  "name": "salon-go",
+  "name": "health-care-dashboard",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,8 +11,14 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.7",
+    "@schedule-x/drag-and-drop": "^2.21.1",
+    "@schedule-x/event-modal": "^2.21.1",
+    "@schedule-x/events-service": "^2.21.1",
+    "@schedule-x/react": "^2.21.2",
+    "@schedule-x/theme-default": "^2.21.1",
     "antd": "^5.20.3",
     "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
     "i18next": "^23.4.6",
     "i18next-browser-languagedetector": "^7.1.0",
     "jodit-react": "^4.1.2",
