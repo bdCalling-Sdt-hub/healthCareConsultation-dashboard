@@ -98,7 +98,7 @@ const Notifications = () => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <Title className="text-[22px]">All Notifications</Title>
-        <button className="bg-[#5c2579cc] text-white h-10 px-4 rounded-md">
+        <button className="bg-[#15405D] text-white h-10 px-4 rounded-md">
           Read All
         </button>
       </div>

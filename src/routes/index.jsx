@@ -13,9 +13,10 @@ import Notifications from "../Pages/Dashboard/Notifications";
 import Transactions from "../Pages/Dashboard/Transactions";
 import UserProfile from "../Pages/Dashboard/AdminProfile/UserProfile";
 import TermsAndCondition from "../Pages/Dashboard/TermsAndCondition";
-import Services from "../Pages/Dashboard/Salon/Services";
+
 import Insights from "../Pages/Dashboard/Insights";
 import Booking from "../Pages/Dashboard/Booking";
+import Services from "../Pages/Dashboard/Services";
 
 const router = createBrowserRouter([
   {
