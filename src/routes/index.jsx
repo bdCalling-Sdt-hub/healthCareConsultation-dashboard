@@ -17,6 +17,7 @@ import TermsAndCondition from "../Pages/Dashboard/TermsAndCondition";
 import Insights from "../Pages/Dashboard/Insights";
 import Booking from "../Pages/Dashboard/Booking";
 import Services from "../Pages/Dashboard/Services";
+import Service from "../Pages/Dashboard/Service";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "/services",
         element: <Services />,
+      },
+      {
+        path: "/services/:id",
+        element: <Service />,
       },
       {
         path: "/insights",

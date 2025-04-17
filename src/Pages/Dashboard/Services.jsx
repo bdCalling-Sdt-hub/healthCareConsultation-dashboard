@@ -2,7 +2,8 @@ import { Table, Modal, Button } from "antd";
 import { useState } from "react";
 import { EyeOutlined, EditOutlined } from "@ant-design/icons";
 import AddAndEditModal from "../../components/ui/Services/AddAndEditModal";
-import { FaTrash } from "react-icons/fa";
+import { FaEye, FaTrash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const servicesData = [
   {
@@ -105,6 +106,9 @@ const Services = () => {
       key: "action",
       render: (_, record) => (
         <div className="flex gap-3">
+          <Link to={`/services/${record?.key}`}>
+            <FaEye className="text-blue-700 cursor-pointer" size={18} />
+          </Link>
           <EditOutlined
             className="text-yellow-500 cursor-pointer hover:text-yellow-700"
             onClick={() => showModal(record)}

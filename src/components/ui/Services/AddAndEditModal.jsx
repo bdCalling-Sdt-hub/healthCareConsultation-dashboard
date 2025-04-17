@@ -1,36 +1,24 @@
 import { Modal, Input, Button, Upload } from "antd";
 import { useState, useEffect } from "react";
-import {
-  UploadOutlined,
-  PlayCircleOutlined,
-  PictureOutlined,
-} from "@ant-design/icons";
+import { UploadOutlined, PictureOutlined } from "@ant-design/icons";
 
 const AddAndEditModal = ({ visible, onClose, service }) => {
   const [form, setForm] = useState({
     title: "",
-    whatWeDo: "",
-    capabilities: "",
-    relatedLinks: "",
+    description: "",
   });
   const [image, setImage] = useState(null);
-  const [videos, setVideos] = useState([null, null]);
 
-  // Populate form with service data if in edit mode
   useEffect(() => {
     if (service) {
       setForm({
         title: service.serviceName,
-        whatWeDo: service.description,
-        capabilities: service.specialization,
-        relatedLinks: service.location,
+        description: service.description,
       });
     } else {
       setForm({
         title: "",
-        whatWeDo: "",
-        capabilities: "",
-        relatedLinks: "",
+        description: "",
       });
     }
   }, [service]);
@@ -44,19 +32,20 @@ const AddAndEditModal = ({ visible, onClose, service }) => {
     return false;
   };
 
-  const handleVideoUpload = (file, index) => {
-    const updatedVideos = [...videos];
-    updatedVideos[index] = file;
-    setVideos(updatedVideos);
-    return false;
-  };
-
   const handleSubmit = () => {
     console.log("Form Data:", form);
     console.log("Image:", image);
-    console.log("Videos:", videos);
     onClose();
   };
+
+  // Add after other useEffect
+  useEffect(() => {
+    return () => {
+      if (image) {
+        URL.revokeObjectURL(URL.createObjectURL(image));
+      }
+    };
+  }, [image]);
 
   return (
     <Modal
@@ -64,65 +53,63 @@ const AddAndEditModal = ({ visible, onClose, service }) => {
       onCancel={onClose}
       footer={null}
       title={service ? "Edit Service" : "Add New Service"}
-      width={800}
+      width={600}
     >
       <div className="space-y-4">
-        <Input
-          name="title"
-          placeholder="Title"
-          value={form.title}
-          onChange={handleInputChange}
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <Input.TextArea
-            name="whatWeDo"
-            placeholder="What we do"
-            value={form.whatWeDo}
-            onChange={handleInputChange}
-          />
-          <Input.TextArea
-            name="capabilities"
-            placeholder="Our Capabilities"
-            value={form.capabilities}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Service Image
+          </label>
           <Upload beforeUpload={handleImageUpload} showUploadList={false}>
             <div className="border-2 border-dashed border-gray-300 p-6 flex flex-col items-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300 rounded-lg">
-              <PictureOutlined className="text-2xl text-blue-500" />
-              <Button icon={<UploadOutlined />} className="mt-2">
-                Select Image
-              </Button>
-              {image && (
-                <p className="mt-2 text-sm text-gray-600">{image.name}</p>
+              {image ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded-lg mb-2"
+                  />
+                  <Button icon={<UploadOutlined />} className="mt-2">
+                    Change Image
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <PictureOutlined className="text-2xl text-blue-500" />
+                  <Button icon={<UploadOutlined />} className="mt-2">
+                    Select Image
+                  </Button>
+                </>
               )}
             </div>
           </Upload>
-          {videos.map((video, index) => (
-            <Upload
-              key={index}
-              beforeUpload={(file) => handleVideoUpload(file, index)}
-              showUploadList={false}
-            >
-              <div className="border-2 border-dashed border-gray-300 p-6 flex flex-col items-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300 rounded-lg">
-                <PlayCircleOutlined className="text-2xl text-blue-500" />
-                <Button icon={<UploadOutlined />} className="mt-2">
-                  Select Video
-                </Button>
-                {video && (
-                  <p className="mt-2 text-sm text-gray-600">{video.name}</p>
-                )}
-              </div>
-            </Upload>
-          ))}
         </div>
-        <Input
-          name="relatedLinks"
-          placeholder="Related Links"
-          value={form.relatedLinks}
-          onChange={handleInputChange}
-        />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Service Title
+          </label>
+          <Input
+            name="title"
+            placeholder="Title"
+            value={form.title}
+            onChange={handleInputChange}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Short Description
+          </label>
+          <Input.TextArea
+            name="description"
+            placeholder="Short Description"
+            value={form.description}
+            onChange={handleInputChange}
+            rows={4}
+          />
+        </div>
+
         <Button type="primary" block onClick={handleSubmit}>
           {service ? "Update Service" : "Add Service"}
         </Button>
