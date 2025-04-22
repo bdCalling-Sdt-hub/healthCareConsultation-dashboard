@@ -18,6 +18,9 @@ import Insights from "../Pages/Dashboard/Insights";
 import Booking from "../Pages/Dashboard/Booking";
 import Services from "../Pages/Dashboard/Services";
 import Service from "../Pages/Dashboard/Service";
+import SingleInsight from "../Pages/Dashboard/SingleInsight";
+import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy";
+import Faq from "../Pages/Dashboard/Faq";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +57,10 @@ const router = createBrowserRouter([
         element: <Insights />,
       },
       {
+        path: "/insights/:id",
+        element: <SingleInsight />,
+      },
+      {
         path: "/users",
         element: <Users />,
       },
@@ -66,8 +73,16 @@ const router = createBrowserRouter([
         element: <ChangePassword />,
       },
       {
+        path: "/privacy-policy",
+        element: <PrivacyPolicy />,
+      },
+      {
         path: "/terms-and-condition",
         element: <TermsAndCondition />,
+      },
+      {
+        path: "/f-a-q",
+        element: <Faq />,
       },
       {
         path: "/change-password",

@@ -8,25 +8,25 @@ import Cookies from "js-cookie";
 
 const Login = () => {
   const navigate = useNavigate();
-  // const [rememberMe, setRememberMe] = useState(false); // Track checkbox state
+  const [rememberMe, setRememberMe] = useState(false); // Track checkbox state
 
-  // const [login] = useLoginMutation();
+  const [login] = useLoginMutation();
 
   const onFinish = async (values) => {
     try {
       // console.log(values);
-      // const response = await login(values).unwrap();
-      // const { accessToken } = response?.data;
-      // const { refreshToken } = response?.data;
+      const response = await login(values).unwrap();
+      const { accessToken } = response?.data;
+      const { refreshToken } = response?.data;
 
-      if (values) {
-        // localStorage.setItem("authToken", accessToken);
+      if (rememberMe) {
+        localStorage.setItem("authToken", accessToken);
         // localStorage.setItem("refreshToken", refreshToken);
-        // Cookies.set("refreshToken", refreshToken);
+        Cookies.set("refreshToken", refreshToken);
       } else {
-        // sessionStorage.setItem("authToken", accessToken);
-        // localStorage.setItem("refreshToken", refreshToken);
-        // Cookies.set("refreshToken", refreshToken);
+        sessionStorage.setItem("authToken", accessToken);
+        // sessionStorage.setItem("refreshToken", refreshToken);
+        Cookies.set("refreshToken", refreshToken);
       }
 
       navigate("/");
@@ -49,8 +49,8 @@ const Login = () => {
   return (
     <div>
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-semibold mb-6">Login</h1>
-        <p>Please enter your email and password to continue</p>
+        <h1 className="text-3xl font-semibold mb-6">Welcome Back!</h1>
+        <p>Please enter your email and password to login</p>
       </div>
       <Form
         onFinish={onFinish}

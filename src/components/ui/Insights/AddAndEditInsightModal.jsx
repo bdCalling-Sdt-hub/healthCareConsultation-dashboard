@@ -6,11 +6,7 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState(
     initialData || {
       title: "",
-      clientBackground: "",
-      challenge: "",
-      approach: "",
-      testimonial: "",
-      imageTestimonial: null,
+      description: "",
       image: null,
     }
   );
@@ -20,8 +16,9 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpload = (file, key) => {
-    setFormData((prev) => ({ ...prev, [key]: file }));
+  const handleUpload = (file) => {
+    setFormData((prev) => ({ ...prev, image: file }));
+    return false;
   };
 
   return (
@@ -39,42 +36,34 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
           value={formData.title}
           onChange={handleChange}
         />
-        <div className="grid grid-cols-3 gap-4">
-          <Input.TextArea
-            placeholder="Client Background"
-            name="clientBackground"
-            value={formData.clientBackground}
-            onChange={handleChange}
-          />
-          <Input.TextArea
-            placeholder="The Challenge"
-            name="challenge"
-            value={formData.challenge}
-            onChange={handleChange}
-          />
-          <Input.TextArea
-            placeholder="Our Approach"
-            name="approach"
-            value={formData.approach}
-            onChange={handleChange}
-          />
-        </div>
         <Input.TextArea
-          placeholder="Testimonial"
-          name="testimonial"
-          value={formData.testimonial}
+          placeholder="Description"
+          name="description"
+          value={formData.description}
           onChange={handleChange}
+          rows={4}
         />
-        <div className="grid grid-cols-2 gap-4">
-          <Upload
-            beforeUpload={(file) => handleUpload(file, "imageTestimonial")}
-          >
-            <Button icon={<UploadOutlined />}>Select Image</Button>
-          </Upload>
-          <Upload beforeUpload={(file) => handleUpload(file, "image")}>
-            <Button icon={<UploadOutlined />}>Select Image</Button>
-          </Upload>
-        </div>
+        <Upload beforeUpload={handleUpload} showUploadList={false}>
+          <div className="border-2 border-dashed border-gray-300 p-6 flex flex-col items-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300 rounded-lg">
+            {formData.image ? (
+              <div className="flex flex-col items-center">
+                <img
+                  src={URL.createObjectURL(formData.image)}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover rounded-lg mb-2"
+                />
+                <Button icon={<UploadOutlined />}>Change Image</Button>
+              </div>
+            ) : (
+              <>
+                <UploadOutlined className="text-2xl text-blue-500" />
+                <Button icon={<UploadOutlined />} className="mt-2">
+                  Select Image
+                </Button>
+              </>
+            )}
+          </div>
+        </Upload>
         <Button type="primary" block onClick={() => onSubmit(formData)}>
           Submit
         </Button>

@@ -110,22 +110,22 @@ const Sidebar = () => {
             </Link>
           ),
         },
-        // {
-        //   key: "/privacy-policy",
-        //   label: (
-        //     <Link to="/privacy-policy" className="text-white hover:text-white">
-        //       Privacy Policy
-        //     </Link>
-        //   ),
-        // },
-        // {
-        //   key: "/f-a-q",
-        //   label: (
-        //     <Link to="/f-a-q" className="text-white hover:text-white">
-        //       FAQ
-        //     </Link>
-        //   ),
-        // },
+        {
+          key: "/privacy-policy",
+          label: (
+            <Link to="/privacy-policy" className="text-white hover:text-white">
+              Privacy Policy
+            </Link>
+          ),
+        },
+        {
+          key: "/f-a-q",
+          label: (
+            <Link to="/f-a-q" className="text-white hover:text-white">
+              FAQ
+            </Link>
+          ),
+        },
       ],
     },
     {

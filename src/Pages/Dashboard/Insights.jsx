@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Table, Button, Modal } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import AddAndEditInsightModal from "../../components/ui/Insights/AddAndEditInsightModal";
+import { FaEye } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 const fakeInsights = [
   {
     key: "1",
@@ -73,7 +75,10 @@ const InsightsPage = () => {
       title: "Action",
       key: "action",
       render: (text, record) => (
-        <>
+        <div className="flex">
+          <Link to={`/insights/${record?.key}`}>
+            <FaEye size={16} style={{ marginRight: 10, color: "#0095FF" }} />
+          </Link>
           <EditOutlined
             onClick={() => handleEdit(record)}
             style={{ marginRight: 10, color: "#F3B806" }}
@@ -82,7 +87,7 @@ const InsightsPage = () => {
             onClick={() => handleDelete(record.key)}
             style={{ color: "red" }}
           />
-        </>
+        </div>
       ),
     },
   ];
