@@ -1,7 +1,16 @@
-import { Button, Table, Image, Modal, Input, Upload, Collapse } from "antd";
+import {
+  Button,
+  Table,
+  Image,
+  Modal,
+  Input,
+  Upload,
+  Collapse,
+  Form,
+} from "antd";
 import { FaPlus } from "react-icons/fa";
 import { useState } from "react";
-import { UploadOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, UploadOutlined } from "@ant-design/icons";
 
 const SingleInsight = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +20,8 @@ const SingleInsight = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [isViewModal, setIsViewModal] = useState(false);
   const [viewingSection, setViewingSection] = useState(null);
+
+  const [form] = Form.useForm();
 
   const insightData = {
     title: "Example Insight",
@@ -193,6 +204,25 @@ const SingleInsight = () => {
     },
   ];
 
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // Process the bars to convert body text to arrays
+      const processedBars = values.bars.map((bar) => ({
+        title: bar.title,
+        body: bar.body.split("\n").filter((point) => point.trim() !== ""),
+      }));
+
+      console.log("Processed Bars:", processedBars);
+      setIsAssignBarsModal(false);
+      setSelectedSection(null);
+      form.resetFields();
+    } catch (error) {
+      console.error("Validation failed:", error);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Insight Details Section */}
@@ -307,30 +337,73 @@ const SingleInsight = () => {
       <Modal
         title={`Assign Bars - ${selectedSection?.title || ""}`}
         open={isAssignBarsModal}
-        onOk={() => setIsAssignBarsModal(false)}
         onCancel={() => {
           setIsAssignBarsModal(false);
           setSelectedSection(null);
+          form.resetFields();
         }}
+        footer={null}
+        width={800}
       >
-        <div className="space-y-4 my-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title
-            </label>
-            <Input placeholder="Enter title" />
-          </div>
+        <Form form={form} layout="vertical" className="space-y-4">
+          <Form.List name="bars" initialValue={[{}]}>
+            {(fields, { add, remove }) => (
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.key}
+                    className="border p-4 rounded-lg relative"
+                  >
+                    <Form.Item
+                      {...field}
+                      label="Bar Title"
+                      name={[field.name, "title"]}
+                      rules={[{ required: true, message: "Title is required" }]}
+                    >
+                      <Input placeholder="Enter bar title" />
+                    </Form.Item>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Body (Enter each point in a new line)
-            </label>
-            <Input.TextArea
-              placeholder="Enter points here...&#10;Each new line will be a separate point&#10;Like this"
-              rows={6}
-            />
-          </div>
-        </div>
+                    <Form.Item
+                      {...field}
+                      label="Body"
+                      name={[field.name, "body"]}
+                      rules={[{ required: true, message: "Body is required" }]}
+                      help="Enter each point in a new line"
+                    >
+                      <Input.TextArea
+                        rows={4}
+                        placeholder="Enter points (one per line)"
+                      />
+                    </Form.Item>
+
+                    {fields.length > 1 && (
+                      <Button
+                        type="text"
+                        className="absolute top-2 right-2"
+                        danger
+                        icon={<MinusCircleOutlined />}
+                        onClick={() => remove(field.name)}
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  block
+                  icon={<FaPlus />}
+                >
+                  Add More Bar
+                </Button>
+              </div>
+            )}
+          </Form.List>
+
+          <Button type="primary" block onClick={handleSubmit}>
+            Save Bars
+          </Button>
+        </Form>
       </Modal>
 
       {/* view modal */}

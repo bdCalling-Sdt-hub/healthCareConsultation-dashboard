@@ -1,15 +1,38 @@
-import React, { useState } from "react";
-import { Modal, Input, Button, Upload } from "antd";
+import React, { useState, useEffect } from "react";
+import { Modal, Input, Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import {
+  useCreateInsightMutation,
+  useUpdateInsightMutation,
+} from "../../../redux/apiSlices/insightsSlice";
+import { getImageUrl } from "../../../utils/getImageUrl";
 
-const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
-  const [formData, setFormData] = useState(
-    initialData || {
-      title: "",
-      description: "",
-      image: null,
+const InsightModal = ({ visible, onClose, initialData }) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    image: null,
+  });
+
+  // Add useEffect to update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        image: initialData.image || null,
+      });
+    } else {
+      setFormData({
+        title: "",
+        description: "",
+        image: null,
+      });
     }
-  );
+  }, [initialData]);
+
+  const [createInsight] = useCreateInsightMutation();
+  const [updateInsight] = useUpdateInsightMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +42,67 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
   const handleUpload = (file) => {
     setFormData((prev) => ({ ...prev, image: file }));
     return false;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Validate required fields
+      if (!formData.title.trim()) {
+        message.error("Title is required!");
+        return;
+      }
+      if (!formData.description.trim()) {
+        message.error("Description is required!");
+        return;
+      }
+      if (!formData.image && !initialData) {
+        message.error("Image is required!");
+        return;
+      }
+
+      // Create FormData
+      const submitData = new FormData();
+      submitData.append("title", formData.title);
+      submitData.append("description", formData.description);
+
+      // Handle image differently for update vs create
+      if (initialData) {
+        // For update: only append if there's a new image
+        if (formData.image instanceof File) {
+          submitData.append("image", formData.image);
+        }
+      } else {
+        // For create: image is required
+        submitData.append("image", formData.image);
+      }
+
+      let response;
+      if (initialData) {
+        response = await updateInsight({
+          id: initialData._id,
+          data: submitData,
+        }).unwrap();
+      } else {
+        response = await createInsight({ data: submitData }).unwrap();
+      }
+
+      if (response?.success) {
+        message.success(
+          initialData
+            ? "Insight updated successfully!"
+            : "Insight added successfully!"
+        );
+        setFormData({
+          title: "",
+          description: "",
+          image: null,
+        });
+        onClose();
+      }
+    } catch (error) {
+      console.error("Operation failed:", error);
+      message.error(error?.data?.message || "Something went wrong!");
+    }
   };
 
   return (
@@ -48,7 +132,11 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
             {formData.image ? (
               <div className="flex flex-col items-center">
                 <img
-                  src={URL.createObjectURL(formData.image)}
+                  src={
+                    formData.image instanceof File
+                      ? URL.createObjectURL(formData.image)
+                      : getImageUrl(formData.image)
+                  }
                   alt="Preview"
                   className="w-32 h-32 object-cover rounded-lg mb-2"
                 />
@@ -64,8 +152,8 @@ const InsightModal = ({ visible, onClose, onSubmit, initialData }) => {
             )}
           </div>
         </Upload>
-        <Button type="primary" block onClick={() => onSubmit(formData)}>
-          Submit
+        <Button type="primary" block onClick={handleSubmit}>
+          {initialData ? "Update" : "Submit"}
         </Button>
       </div>
     </Modal>

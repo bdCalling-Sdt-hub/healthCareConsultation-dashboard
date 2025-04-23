@@ -21,15 +21,16 @@ import Service from "../Pages/Dashboard/Service";
 import SingleInsight from "../Pages/Dashboard/SingleInsight";
 import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy";
 import Faq from "../Pages/Dashboard/Faq";
+import PrivateRoute from "./PrivateRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
     // element: <ProtectedRoute><Main /></ProtectedRoute> ,
     element: (
-      // <PrivateRoute>
-      <Main />
-      // </PrivateRoute>
+      <PrivateRoute>
+        <Main />
+      </PrivateRoute>
     ),
     children: [
       {

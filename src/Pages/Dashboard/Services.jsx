@@ -1,73 +1,33 @@
-import { Table, Modal, Button } from "antd";
+import { Table, Modal, Button, Spin } from "antd";
 import { useState } from "react";
 import { EyeOutlined, EditOutlined } from "@ant-design/icons";
 import AddAndEditModal from "../../components/ui/Services/AddAndEditModal";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
-const servicesData = [
-  {
-    key: "1",
-    serviceName: "General Consultation",
-    description:
-      "Comprehensive health check-up and consultation with a senior doctor.",
-    fee: "$50",
-    duration: "30 minutes",
-    doctor: "Dr. John Doe",
-    specialization: "General Physician",
-    location: "Downtown Medical Center",
-    availability: "Monday - Friday, 9 AM - 5 PM",
-  },
-  {
-    key: "2",
-    serviceName: "Cardiology Consultation",
-    description: "Evaluation and diagnosis of heart-related conditions.",
-    fee: "$100",
-    duration: "45 minutes",
-    doctor: "Dr. Emily Smith",
-    specialization: "Cardiologist",
-    location: "City Heart Clinic",
-    availability: "Tuesday & Thursday, 10 AM - 4 PM",
-  },
-  {
-    key: "3",
-    serviceName: "Dermatology Consultation",
-    description: "Skin-related diagnosis and treatment options.",
-    fee: "$80",
-    duration: "40 minutes",
-    doctor: "Dr. Alex Johnson",
-    specialization: "Dermatologist",
-    location: "SkinCare Hospital",
-    availability: "Monday - Saturday, 11 AM - 6 PM",
-  },
-  {
-    key: "4",
-    serviceName: "Pediatrics Consultation",
-    description:
-      "Healthcare services for children from newborns to adolescents.",
-    fee: "$60",
-    duration: "30 minutes",
-    doctor: "Dr. Linda Williams",
-    specialization: "Pediatrician",
-    location: "Children's Medical Center",
-    availability: "Monday - Friday, 9 AM - 3 PM",
-  },
-  {
-    key: "5",
-    serviceName: "Orthopedic Consultation",
-    description: "Diagnosis and treatment for bone and joint disorders.",
-    fee: "$120",
-    duration: "50 minutes",
-    doctor: "Dr. Robert Brown",
-    specialization: "Orthopedic Surgeon",
-    location: "Advanced Orthopedic Clinic",
-    availability: "Wednesday & Friday, 8 AM - 2 PM",
-  },
-];
+import {
+  useDeleteServiceMutation,
+  useGetAllServicesQuery,
+} from "../../redux/apiSlices/ServiceSlice";
+import { getImageUrl } from "../../utils/getImageUrl";
+import toast from "react-hot-toast";
 
 const Services = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
+
+  const { data: services, isLoading } = useGetAllServicesQuery();
+  const [deleteService, { isLoading: isDeleting }] = useDeleteServiceMutation();
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center">
+        <Spin />
+      </div>
+    );
+
+  const allServices = services?.data || [];
+
+  // console.log(allServices);
 
   const showModal = (record) => {
     setSelectedService(record);
@@ -79,6 +39,36 @@ const Services = () => {
     setSelectedService(null);
   };
 
+  const handleDelete = async (id) => {
+    try {
+      Modal.confirm({
+        title: "Are you sure you want to delete this service?",
+        content: "This action cannot be undone.",
+        okText: "Yes",
+        okType: "danger",
+        cancelText: "No",
+        onOk: async () => {
+          try {
+            const res = await deleteService(id);
+            if (res?.data?.success) {
+              toast.success(
+                res?.data?.message || "Service deleted successfully"
+              );
+            } else {
+              toast.error(res?.data?.message || "Failed to delete service");
+            }
+          } catch (error) {
+            console.error("Error deleting service:", error);
+            toast.error("Failed to delete service");
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Error showing confirmation modal:", error);
+      toast.error("Something went wrong");
+    }
+  };
+
   const columns = [
     {
       title: "Serial",
@@ -87,33 +77,44 @@ const Services = () => {
       render: (text, record, index) => index + 1,
     },
     {
+      title: "Service Image",
+      dataIndex: "image",
+      key: "image",
+      render: (image) => (
+        <img
+          src={getImageUrl(image)}
+          alt="Service"
+          className="w-20 h-16 rounded-lg object-cover"
+        />
+      ),
+    },
+    {
       title: "Service Name",
-      dataIndex: "serviceName",
-      key: "serviceName",
+      dataIndex: "title",
+      key: "title",
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
     },
-    {
-      title: "Fee",
-      dataIndex: "fee",
-      key: "fee",
-    },
+
     {
       title: "Action",
       key: "action",
       render: (_, record) => (
         <div className="flex gap-3">
-          <Link to={`/services/${record?.key}`}>
+          <Link to={`/services/${record?._id}`}>
             <FaEye className="text-blue-700 cursor-pointer" size={18} />
           </Link>
           <EditOutlined
             className="text-yellow-500 cursor-pointer hover:text-yellow-700"
             onClick={() => showModal(record)}
           />
-          <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" />
+          <FaTrash
+            onClick={() => handleDelete(record?._id)}
+            className="text-red-500 cursor-pointer hover:text-red-700"
+          />
         </div>
       ),
     },
@@ -135,8 +136,8 @@ const Services = () => {
       </div>
       <Table
         columns={columns}
-        rowKey="key"
-        dataSource={servicesData}
+        rowKey="_id"
+        dataSource={allServices}
         pagination={false}
       />
 

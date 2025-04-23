@@ -1,4 +1,4 @@
-import { Button, Modal, Input, Upload } from "antd";
+import { Button, Modal, Input, Upload, Form, Spin, message } from "antd";
 import { FaPlus } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
@@ -6,41 +6,46 @@ import {
   UploadOutlined,
   PlayCircleOutlined,
   PictureOutlined,
+  MinusCircleOutlined,
 } from "@ant-design/icons";
+import {
+  useCreateTabsMutation,
+  useDeleteTabsMutation,
+  useGetAllTabsQuery,
+  useGetSingleServiceQuery,
+  useUpdateTabsMutation,
+} from "../../redux/apiSlices/ServiceSlice";
+import { getImageUrl } from "../../utils/getImageUrl";
+import { MdEditSquare } from "react-icons/md";
 
-const data = {
-  key: "1",
-  serviceName: "General Consultation",
-  image: "https://i.ibb.co.com/tMdLTwg3/image-11.png",
-  description:
-    "Comprehensive health check-up and consultation with a senior doctor.",
-  fee: "$50",
-  duration: "30 minutes",
-  doctor: "Dr. John Doe",
-  specialization: "General Physician",
-  location: "Downtown Medical Center",
-  availability: "Monday - Friday, 9 AM - 5 PM",
-  tabs: [
-    { id: 1, title: "Tab 1", content: "Content for Tab 1" },
-    { id: 1, title: "Tab 1", content: "Content for Tab 1" },
-  ],
-};
-
+// Remove unused mock data
 const Service = () => {
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({
-    tabName: "",
-    whyItMatters: "",
-    howItWorks: [],
-    discovery: "",
-  });
+  const [isTabContentModalOpen, setIsTabContentModalOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(null);
+  const [selectedTabForEdit, setSelectedTabForEdit] = useState(null);
+  const [form] = Form.useForm();
   const [image, setImage] = useState(null);
   const [videos, setVideos] = useState([null, null]);
 
-  const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const { data: service, isLoading } = useGetSingleServiceQuery(id);
+  const { data: getTabs, isLoading: isTabLoading } = useGetAllTabsQuery(id);
+
+  const [createTab] = useCreateTabsMutation();
+  const [editTab] = useUpdateTabsMutation();
+  const [deleteTab] = useDeleteTabsMutation();
+
+  if (isLoading || isTabLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spin />
+      </div>
+    );
+  }
+
+  const serviceData = service?.data || [];
+  const tabs = getTabs?.data || [];
 
   const handleImageUpload = (file) => {
     setImage(file);
@@ -54,23 +59,115 @@ const Service = () => {
     return false;
   };
 
-  const handleSubmit = () => {
-    console.log("Form Data:", form);
-    console.log("Image:", image);
-    console.log("Videos:", videos);
+  const handleCloseModal = () => {
     setIsModalOpen(false);
+    setSelectedTabForEdit(null);
+    form.resetFields();
+    setImage(null);
+    setVideos([null, null]);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // Create the data object with the required structure
+      const data = {
+        service: id,
+        tabName: values.tabName,
+        contents: values.contents.map((section) => ({
+          title: section.title,
+          descriptions: section.descriptions
+            .split("\n")
+            .filter((point) => point.trim() !== ""),
+        })),
+      };
+
+      console.log(data);
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      if (image) {
+        formData.append("image", image);
+      }
+      if (videos.length) {
+        videos.forEach((video) => {
+          if (video) {
+            formData.append(`media`, video);
+          }
+        });
+      }
+
+      let response;
+      if (selectedTabForEdit) {
+        response = await editTab({
+          id: selectedTabForEdit._id,
+          data: formData,
+        }).unwrap();
+      } else {
+        response = await createTab(formData).unwrap();
+      }
+
+      if (response?.success) {
+        message.success(
+          selectedTabForEdit
+            ? "Tab updated successfully!"
+            : "Tab added successfully!"
+        );
+        handleCloseModal();
+      }
+    } catch (error) {
+      console.error("Validation failed:", error);
+      message.error(error?.data?.message || "Something went wrong!");
+    }
+  };
+
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+    setIsTabContentModalOpen(true);
+  };
+
+  const handleEditClick = (tab) => {
+    setSelectedTabForEdit(tab);
+    form.setFieldsValue({
+      tabName: tab.tabName,
+      contents: tab.contents.map((content) => ({
+        title: content.title,
+        descriptions: content.descriptions.join("\n"),
+      })),
+    });
+    if (tab.images?.[0]) {
+      setImage(tab.images[0]);
+    }
+    if (tab.videos?.length) {
+      setVideos(tab.videos.map((video) => video || null));
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteTab = async (tab) => {
+    try {
+      const response = await deleteTab(tab._id).unwrap();
+      if (response?.success) {
+        message.success("Tab deleted successfully!");
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      message.error(error?.data?.message || "Something went wrong!");
+    }
   };
 
   return (
     <div>
       <img
-        src={data.image}
-        alt={data.serviceName}
-        className="w-[400px] h-[300px]"
+        src={getImageUrl(serviceData?.image)}
+        alt={serviceData?.title}
+        className="w-[400px] h-[300px] rounded-xl object-contain"
       />
       <div className="my-5">
-        <h1 className="text-3xl font-bold">{data?.serviceName}</h1>
-        <p className="text-lg">{data?.description}</p>
+        <h1 className="text-3xl font-bold">{serviceData?.title}</h1>
+        <p className="text-lg">{serviceData?.description}</p>
       </div>
       <div>
         <div className="flex justify-between">
@@ -83,75 +180,176 @@ const Service = () => {
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-5 my-10">
-          {data?.tabs?.map((tab) => (
-            <h1
-              key={tab.id}
-              className="bg-primary px-5 py-3 text-white hover:bg-[#1b557c] cursor-pointer rounded-lg"
-            >
-              {tab.title}
-            </h1>
+          {tabs?.map((tab) => (
+            <div key={tab?._id} className="relative group">
+              <h1
+                className="bg-primary px-5 py-3 text-white text-sm hover:bg-[#1b557c] cursor-pointer rounded-lg"
+                onClick={() => handleTabClick(tab)}
+              >
+                {tab?.tabName}
+              </h1>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<MdEditSquare />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditClick(tab);
+                  }}
+                />
+                <Button
+                  type="primary"
+                  danger
+                  size="small"
+                  icon={<MinusCircleOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    Modal.confirm({
+                      title: "Delete Tab",
+                      content: "Are you sure you want to delete this tab?",
+                      okText: "Yes",
+                      okType: "danger",
+                      cancelText: "No",
+                      onOk: () => handleDeleteTab(tab),
+                    });
+                  }}
+                />
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
+      {/* Tab Content Modal */}
       <Modal
-        title="Add New Tab"
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        title={selectedTab?.tabName}
+        open={isTabContentModalOpen}
+        onCancel={() => {
+          setIsTabContentModalOpen(false);
+          setSelectedTab(null);
+        }}
         footer={null}
         width={800}
       >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tab Name
-            </label>
-            <Input
-              name="tabName"
-              placeholder="Enter tab name"
-              value={form.tabName}
-              onChange={handleInputChange}
-            />
-          </div>
+        {selectedTab && (
+          <div className="space-y-6">
+            {/* Content Sections */}
+            {selectedTab.contents.map((content, index) => (
+              <div key={index} className="border-b pb-4 last:border-b-0">
+                <h3 className="text-xl font-semibold mb-3">{content.title}</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  {content.descriptions.map((desc, idx) => (
+                    <li key={idx} className="text-gray-700">
+                      {desc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Why It Matters
-            </label>
-            <Input.TextArea
-              name="whyItMatters"
-              placeholder="Explain why it matters"
-              value={form.whyItMatters}
-              onChange={handleInputChange}
-              rows={4}
-            />
-          </div>
+            {/* Images Section */}
+            {selectedTab.images && selectedTab.images.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-3">Image</h3>
+                <div className="flex justify-center">
+                  <img
+                    src={getImageUrl(selectedTab.images[0])}
+                    alt="Tab Image"
+                    className="w-full max-w-lg h-64 object-cover rounded-lg"
+                  />
+                </div>
+              </div>
+            )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              How It Works
-            </label>
-            <Input.TextArea
-              name="howItWorks"
-              placeholder="Explain how it works"
-              value={form.howItWorks}
-              onChange={handleInputChange}
-              rows={4}
-            />
+            {/* Videos Section */}
+            {selectedTab.videos && selectedTab.videos.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-3">Videos</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedTab.videos.map((video, index) => (
+                    <video key={index} controls className="w-full rounded-lg">
+                      <source src={getImageUrl(video)} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        )}
+      </Modal>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Discovery
-            </label>
-            <Input.TextArea
-              name="discovery"
-              placeholder="Enter discovery details"
-              value={form.discovery}
-              onChange={handleInputChange}
-              rows={4}
-            />
-          </div>
+      {/* Add/Edit Tab Modal */}
+      <Modal
+        title={selectedTabForEdit ? "Edit Tab" : "Add New Tab"}
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={800}
+      >
+        <Form form={form} layout="vertical" className="space-y-4">
+          <Form.Item
+            name="tabName"
+            label="Tab Name"
+            rules={[{ required: true, message: "Please enter tab name" }]}
+          >
+            <Input placeholder="Enter tab name" />
+          </Form.Item>
+
+          <Form.List name="contents" initialValue={[{ key: 0 }]}>
+            {(fields, { add, remove }) => (
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.key}
+                    className="border p-4 rounded-lg relative"
+                  >
+                    <Form.Item
+                      key={`title-${field.key}`}
+                      label="Section Title"
+                      name={[field.name, "title"]}
+                      rules={[{ required: true, message: "Title is required" }]}
+                    >
+                      <Input placeholder="Enter section title" />
+                    </Form.Item>
+
+                    <Form.Item
+                      key={`descriptions-${field.key}`}
+                      label="Body"
+                      name={[field.name, "descriptions"]}
+                      rules={[{ required: true, message: "Body is required" }]}
+                      help="Enter each point in a new line"
+                    >
+                      <Input.TextArea
+                        rows={4}
+                        placeholder="Enter points (one per line)"
+                      />
+                    </Form.Item>
+
+                    {fields.length > 1 && (
+                      <Button
+                        type="text"
+                        className="absolute top-2 right-2"
+                        danger
+                        icon={<MinusCircleOutlined />}
+                        onClick={() => remove(field.name)}
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  block
+                  icon={<FaPlus />}
+                >
+                  Add More Section
+                </Button>
+              </div>
+            )}
+          </Form.List>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -162,7 +360,11 @@ const Service = () => {
                 {image ? (
                   <div className="flex flex-col items-center">
                     <img
-                      src={URL.createObjectURL(image)}
+                      src={
+                        typeof image === "string"
+                          ? getImageUrl(image)
+                          : URL.createObjectURL(image)
+                      }
                       alt="Preview"
                       className="w-32 h-32 object-cover rounded-lg mb-2"
                     />
@@ -196,7 +398,9 @@ const Service = () => {
                       <div className="flex flex-col items-center">
                         <PlayCircleOutlined className="text-2xl text-blue-500" />
                         <p className="mt-2 text-sm text-gray-600">
-                          {videos[index].name}
+                          {typeof videos[index] === "string"
+                            ? videos[index].split("/").pop()
+                            : videos[index].name}
                         </p>
                         <Button icon={<UploadOutlined />} className="mt-2">
                           Change Video
@@ -217,9 +421,9 @@ const Service = () => {
           </div>
 
           <Button type="primary" block onClick={handleSubmit}>
-            Add Tab
+            {selectedTabForEdit ? "Update Tab" : "Add Tab"}
           </Button>
-        </div>
+        </Form>
       </Modal>
     </div>
   );

@@ -113,7 +113,7 @@ const authSlice = api.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-          url: "/admin/profile",
+          url: "/user/profile",
         };
       },
     }),
