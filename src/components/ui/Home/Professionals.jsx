@@ -1,40 +1,10 @@
 import randomImg from "../../../assets/randomProfile2.jpg";
 import salongoLogo from "../../../assets/salon-go-logo.png";
-
-// Dummy data for Professionals Component
+import { useBestServicesQuery } from "../../../redux/apiSlices/dashboardSlice";
 
 const Professionals = () => {
-  // Simulate loading state
-  const dummyProfessionalsData = {
-    data: [
-      {
-        name: "Revenue Integrity & Compliance",
-        conversionRate: 85,
-      },
-      {
-        name: "Finance Optimization",
-        conversionRate: 78,
-      },
-      {
-        name: "Healthcare Cost Analysis",
-        conversionRate: 92,
-      },
-      {
-        name: "Budgeting & Forecasting",
-        conversionRate: 45,
-      },
-      {
-        name: "Payment & Reimbursement Solutions",
-        conversionRate: 73,
-      },
-      {
-        name: "Financial Strategy & Growth Consulting",
-        conversionRate: 80,
-      },
-    ],
-  };
-  const isLoading = false;
-  const professionalsData = dummyProfessionalsData;
+  // Replace dummy data with RTK Query
+  const { data: professionalsData, isLoading, error } = useBestServicesQuery();
 
   if (isLoading) {
     return (
@@ -42,6 +12,10 @@ const Professionals = () => {
         <img src={salongoLogo} alt="" />
       </div>
     );
+  }
+
+  if (error) {
+    return <div>Error loading service analytics</div>;
   }
 
   const professionals = professionalsData?.data;
@@ -56,17 +30,17 @@ const Professionals = () => {
       <div className="md:flex flex-col px-10 gap-4">
         {topProfessionals?.map((value, index) => (
           <div key={index} className="flex items-center gap-4">
-            <h1 className="text-sm font-medium  w-60">{value?.name}</h1>
+            <h1 className="text-sm font-medium w-60">{value?.serviceName}</h1>
             <div className="flex items-center flex-1">
               <div className="w-full bg-secondary rounded-full h-2.5">
                 <div
                   className="bg-primary h-2.5 rounded-full"
-                  style={{ width: `${value.conversionRate}%` }}
+                  style={{ width: `${value.percentage}%` }}
                 ></div>
               </div>
             </div>
 
-            <p className="text-sm font-medium">{value?.conversionRate}%</p>
+            <p className="text-sm font-medium">{value?.percentage}%</p>
           </div>
         ))}
       </div>

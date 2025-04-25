@@ -6,6 +6,7 @@ import { FaEye } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import {
   useCreateInsightMutation,
+  useDeleteInsightMutation,
   useInsightsQuery,
 } from "../../redux/apiSlices/insightsSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
@@ -18,7 +19,7 @@ const InsightsPage = () => {
   // console.log(editingInsight);
 
   const { data: insights, isLoading } = useInsightsQuery();
-  const [createInsight] = useCreateInsightMutation();
+  const [deleteInsight] = useDeleteInsightMutation();
 
   if (isLoading) {
     return (

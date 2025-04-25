@@ -2,19 +2,11 @@ import { FaPrescriptionBottleMedical, FaUsers } from "react-icons/fa6";
 import salongoLogo from "../../../assets/salon-go-logo.png";
 import { FaThList } from "react-icons/fa";
 import { GrMoney } from "react-icons/gr";
+import { useGeneralStatsQuery } from "../../../redux/apiSlices/dashboardSlice";
 
 const GeneralStateSection = () => {
-  // Simulated dummy data
-  const generalState = {
-    data: {
-      totalRevenue: 1500,
-      totalClients: 120,
-      pendingApplication: 45,
-      completedConsultation: 320,
-    },
-  };
-
-  const isLoading = false; // Simulated loading state
+  // Replace dummy data with RTK Query
+  const { data: generalState, isLoading, error } = useGeneralStatsQuery();
 
   if (isLoading) {
     return (
@@ -22,6 +14,10 @@ const GeneralStateSection = () => {
         <img src={salongoLogo} alt="" />
       </div>
     );
+  }
+
+  if (error) {
+    return <div>Error loading data</div>;
   }
 
   const state = generalState?.data;
@@ -33,7 +29,7 @@ const GeneralStateSection = () => {
           <div>
             <h1 className="text-lg text-gray-400">Total Revenue</h1>
             <h1 className="text-2xl font-semibold text-white">
-              ${state?.totalRevenue}
+              ${state?.totalRevenue || 0}
             </h1>
           </div>
           <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center">
@@ -59,7 +55,7 @@ const GeneralStateSection = () => {
           <div>
             <h1 className="text-lg text-gray-400">Pending Application</h1>
             <h1 className="text-2xl font-semibold text-white">
-              {state?.pendingApplication}
+              {state?.pendingApplications}
             </h1>
           </div>
           <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center">
@@ -72,7 +68,7 @@ const GeneralStateSection = () => {
           <div>
             <h1 className="text-lg text-gray-400">Completed Consultation</h1>
             <h1 className="text-2xl font-semibold text-white">
-              {state?.completedConsultation}
+              {state?.completedConsultations}
             </h1>
           </div>
           <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center">

@@ -1,40 +1,25 @@
 import React, { useState } from "react";
-import { Table, Space, Avatar, Modal } from "antd";
+import { Table, Space, Avatar, Modal, Spin } from "antd";
 import { FaEye } from "react-icons/fa";
 import randomImg from "../../assets/randomProfile2.jpg";
+import { useUsersQuery } from "../../redux/apiSlices/userSlice";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const users = {
-    data: {
-      data: [
-        {
-          id: "1",
-          name: "John Doe",
-          email: "john@example.com",
-          profileImg: "https://randomuser.me/api/portraits/men/1.jpg",
-          location: "Springfield",
-          industryName: "IT",
-          phone: "+123456789",
-          address: "123 Main St",
-        },
-        {
-          id: "2",
-          name: "Jane Smith",
-          email: "jane@example.com",
-          profileImg: "https://randomuser.me/api/portraits/women/2.jpg",
-          location: "Springfield",
-          industryName: "Healthcare",
-          phone: "+987654321",
-          address: "456 Elm St",
-        },
-      ],
-    },
-  };
+  const { data: usersData, isLoading } = useUsersQuery();
 
-  const data = users?.data?.data;
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spin />
+      </div>
+    );
+
+  const data = usersData?.data;
+  console.log(data);
 
   const showUserDetails = (user) => {
     setSelectedUser(user);
@@ -59,10 +44,10 @@ const Users = () => {
       key: "name",
       render: (text, record) => {
         const name = record.name || "Unknown";
-        const imgUrl = record.profileImg || randomImg;
+        const imgUrl = record?.profile || randomImg;
         return (
           <Space>
-            <Avatar src={imgUrl} alt={name} size="large" />
+            <Avatar src={getImageUrl(imgUrl)} alt={name} size="large" />
             <span>{name}</span>
           </Space>
         );
@@ -77,11 +62,13 @@ const Users = () => {
       title: "Phone Number",
       dataIndex: "phone",
       key: "phone",
+      render: (phone) => <p>{phone || "unknown"}</p>,
     },
     {
       title: "Address",
       dataIndex: "address",
       key: "address",
+      render: (address) => <p>{address || "unknown"}</p>,
     },
     {
       title: "Location",
@@ -110,6 +97,7 @@ const Users = () => {
         columns={columns}
         dataSource={data}
         pagination={{ pageSize: 10 }}
+        rowKey="_id"
       />
 
       {/* User Details Modal */}

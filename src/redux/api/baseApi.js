@@ -27,7 +27,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   // If the access token is expired, handle token refresh
   if (result.error) {
-    if (result.error.status === 500) {
+    if (result.error.status === 401) {
       // Call the refresh token API
       const refreshResult = await baseQuery(
         {
@@ -77,7 +77,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Services", "AdminData", "Insights"],
+  tagTypes: ["Services", "AdminData", "Insights", "Sections", "Faqs"],
   endpoints: () => ({}),
 });
 

@@ -1,18 +1,29 @@
 import {
   Button,
   Table,
-  Image,
   Modal,
   Input,
   Upload,
   Collapse,
   Form,
+  message,
 } from "antd";
 import { FaPlus } from "react-icons/fa";
 import { useState } from "react";
 import { MinusCircleOutlined, UploadOutlined } from "@ant-design/icons";
+import { useParams } from "react-router-dom";
+import {
+  useCreateBarsMutation,
+  useCreateSectionMutation,
+  useDeleteSectionMutation,
+  useGetAllSectionsByInsightIdQuery,
+  useUpdateSectionMutation,
+} from "../../redux/apiSlices/insightsSlice";
+import { getImageUrl } from "../../utils/getImageUrl";
+import toast from "react-hot-toast";
 
 const SingleInsight = () => {
+  // State management
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
@@ -20,145 +31,40 @@ const SingleInsight = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [isViewModal, setIsViewModal] = useState(false);
   const [viewingSection, setViewingSection] = useState(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    image: null,
+  });
 
+  // Form and route hooks
   const [form] = Form.useForm();
+  const { id } = useParams();
 
-  const insightData = {
-    title: "Example Insight",
-    description: "This is a detailed description of the insight.",
-    image:
-      "https://www.inovalon.com/wp-content/uploads/2022/07/INO-22-0989-How-Healthcare-Organizations-Leverage.png",
-  };
+  // API hooks
+  const { data: getInsightData, isLoading } =
+    useGetAllSectionsByInsightIdQuery(id);
+  const [createSection] = useCreateSectionMutation();
+  const [updateSection] = useUpdateSectionMutation();
+  const [deleteSection] = useDeleteSectionMutation();
+  const [assignBars] = useCreateBarsMutation();
 
-  // Dummy data for the table
-  const [sections] = useState([
-    {
-      id: 1,
-      title: "Increasing Costs of Medical Technology",
-      logo: "https://cdn-icons-png.flaticon.com/512/2491/2491418.png",
-      bars: [
-        {
-          title: "Bar 1",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 2",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 3",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 4",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Pharmaceutical & Prescription Drug Costs",
-      logo: "https://cdn-icons-png.flaticon.com/512/4360/4360311.png",
-      bars: [
-        {
-          title: "Bar 1",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 2",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 3",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Administrative & Operational Inefficiencies",
-      logo: "https://cdn-icons-png.flaticon.com/512/1968/1968641.png",
-      bars: [
-        {
-          title: "Bar 1",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 2",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-      ],
-    },
-    {
-      id: 4,
-      title: "Aging Population & Chronic Disease Burden",
-      logo: "https://cdn-icons-png.flaticon.com/512/3209/3209005.png",
-      bars: [
-        {
-          title: "Bar 1",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-        {
-          title: "Bar 2",
-          body: [
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus provident ex dolore labore rem accusantium amet esse laboriosam quod, modi ipsam optio odio, rerum a tempore ullam deleniti eius odit doloremque molestiae quam officiis! Commodi nihil dolores a consequuntur molestiae? Quo, expedita tempore. Vitae temporibus rerum eos maiores? Facere, blanditiis!",
-          ],
-        },
-      ],
-    },
-  ]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
+  const sections = getInsightData?.data;
+  const insightData = sections?.[0]?.insight || {};
+
+  // Table columns configuration
   const columns = [
     {
       title: "Logo",
       key: "logo",
       render: (_, record) => (
         <img
-          src={record.logo}
+          src={getImageUrl(record?.image)}
           alt="section logo"
-          className="w-10 h-10 object-contain"
+          className="w-14 h-14 rounded-lg object-cover"
         />
       ),
     },
@@ -172,55 +78,165 @@ const SingleInsight = () => {
       key: "actions",
       render: (_, record) => (
         <div className="flex gap-2">
-          <Button
-            type="primary"
-            onClick={() => {
-              setViewingSection(record);
-              setIsViewModal(true);
-            }}
-          >
+          <Button type="primary" onClick={() => handleView(record)}>
             View
           </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditingSection(record);
-              setIsEditModalOpen(true);
-            }}
-          >
+          <Button type="primary" onClick={() => handleEdit(record)}>
             Edit
           </Button>
-          <Button
-            onClick={() => {
-              setSelectedSection(record);
-              setIsAssignBarsModal(true);
-            }}
-          >
-            Assign Bars
+          <Button onClick={() => handleAssignBars(record)}>Assign Bars</Button>
+          <Button onClick={() => handleDelete(record._id)} danger>
+            Delete
           </Button>
-          <Button danger>Delete</Button>
         </div>
       ),
     },
   ];
 
+  // Handler functions
+  const handleView = (record) => {
+    setViewingSection(record);
+    setIsViewModal(true);
+  };
+
+  const handleEdit = (record) => {
+    setEditingSection(record);
+    setFormData({ title: record.title, image: null });
+    setIsEditModalOpen(true);
+  };
+
+  const handleAssignBars = (record) => {
+    setSelectedSection(record);
+    setIsAssignBarsModal(true);
+  };
+
+  const handleCreateSection = async () => {
+    try {
+      const submitData = new FormData();
+      submitData.append("data", JSON.stringify({ title: formData.title }));
+      if (formData.image) {
+        submitData.append("image", formData.image);
+      }
+
+      const response = await createSection({ id, data: submitData }).unwrap();
+      if (response?.success) {
+        toast.success("Section created successfully!");
+        handleCloseModal();
+      } else {
+        toast.error(response?.message || "Failed to create section");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong!");
+    }
+  };
+
+  const handleDelete = (sectionId) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this section?",
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          const response = await deleteSection(sectionId).unwrap();
+          if (response?.success) {
+            toast.success(response?.message || "Section deleted successfully!");
+          } else {
+            toast.error(response?.message || "Failed to delete section!");
+          }
+        } catch (error) {
+          toast.error(error?.data?.message || "Something went wrong!");
+        }
+      },
+    });
+  };
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-
-      // Process the bars to convert body text to arrays
-      const processedBars = values.bars.map((bar) => ({
+      const processedBars = values.bars.map((bar, index) => ({
         title: bar.title,
         body: bar.body.split("\n").filter((point) => point.trim() !== ""),
+        id: selectedSection.bars?.[index]?.id || `${Date.now()}-${index}`,
       }));
 
-      console.log("Processed Bars:", processedBars);
-      setIsAssignBarsModal(false);
-      setSelectedSection(null);
-      form.resetFields();
+      const response = await assignBars({
+        id: selectedSection._id,
+        data: { contents: processedBars },
+      }).unwrap();
+
+      if (response?.success) {
+        toast.success(response?.message || "Bars assigned successfully!");
+        handleCloseAssignBarsModal();
+      } else {
+        toast.error(response?.message || "Failed to assign bars!");
+      }
     } catch (error) {
       console.error("Validation failed:", error);
+      toast.error(error?.data?.message || "Something went wrong!");
     }
+  };
+
+  const handleUpdateSection = async () => {
+    try {
+      if (!editingSection?._id) return;
+
+      const submitData = new FormData();
+      submitData.append(
+        "data",
+        JSON.stringify({
+          title: formData.title || editingSection.title,
+        })
+      );
+
+      if (formData.image instanceof File) {
+        submitData.append("image", formData.image);
+      }
+
+      const response = await updateSection({
+        id: editingSection._id,
+        data: submitData,
+      }).unwrap();
+
+      if (response?.success) {
+        toast.success(response?.message || "Section updated successfully!");
+        handleCloseEditModal();
+      } else {
+        toast.error(response?.message || "Failed to update section!");
+      }
+    } catch (error) {
+      message.error(error?.data?.message || "Something went wrong!");
+    }
+  };
+
+  // Modal close handlers
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setFormData({ title: "", image: null });
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingSection(null);
+    setFormData({ title: "", image: null });
+  };
+
+  const handleCloseAssignBarsModal = () => {
+    setIsAssignBarsModal(false);
+    setSelectedSection(null);
+    form.resetFields();
+  };
+
+  // Utility handlers
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageUpload = (file) => {
+    setFormData((prev) => ({ ...prev, image: file }));
+    return false;
   };
 
   return (
@@ -230,7 +246,7 @@ const SingleInsight = () => {
         <div className="flex flex-col items-center justify-center">
           <div>
             <img
-              src={insightData.image}
+              src={getImageUrl(insightData.image)}
               alt="Insight Image"
               className=" h-[300px] object-cover rounded-lg"
             />
@@ -249,6 +265,7 @@ const SingleInsight = () => {
             type="primary"
             icon={<FaPlus />}
             onClick={() => setIsModalOpen(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-5 rounded"
           >
             Add Section
           </Button>
@@ -256,7 +273,7 @@ const SingleInsight = () => {
         <Table
           columns={columns}
           dataSource={sections}
-          rowKey="id"
+          rowKey="_id"
           pagination={false}
         />
       </div>
@@ -264,24 +281,47 @@ const SingleInsight = () => {
       <Modal
         title="Add New Section"
         open={isModalOpen}
-        onOk={() => setIsModalOpen(false)}
-        onCancel={() => setIsModalOpen(false)}
+        onOk={handleCreateSection}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setFormData({ title: "", image: null });
+        }}
       >
         <div className="space-y-4 mt-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Section Title
             </label>
-            <Input placeholder="Enter section title" />
+            <Input
+              name="title"
+              placeholder="Enter section title"
+              value={formData.title}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Section Logo
             </label>
-            <Upload maxCount={1} showUploadList={false}>
+            <Upload
+              maxCount={1}
+              showUploadList={false}
+              beforeUpload={handleImageUpload}
+            >
               <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg">
-                <Button icon={<UploadOutlined />}>Upload Logo</Button>
+                {formData.image ? (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={URL.createObjectURL(formData.image)}
+                      alt="Preview"
+                      className="w-20 h-20 object-contain mb-2"
+                    />
+                    <Button icon={<UploadOutlined />}>Change Logo</Button>
+                  </div>
+                ) : (
+                  <Button icon={<UploadOutlined />}>Upload Logo</Button>
+                )}
               </div>
             </Upload>
           </div>
@@ -292,10 +332,11 @@ const SingleInsight = () => {
       <Modal
         title="Edit Section"
         open={isEditModalOpen}
-        onOk={() => setIsEditModalOpen(false)}
+        onOk={handleUpdateSection}
         onCancel={() => {
           setIsEditModalOpen(false);
           setEditingSection(null);
+          setFormData({ title: "", image: null });
         }}
       >
         <div className="space-y-4 mt-4">
@@ -304,8 +345,10 @@ const SingleInsight = () => {
               Section Title
             </label>
             <Input
+              name="title"
               placeholder="Enter section title"
-              defaultValue={editingSection?.title}
+              value={formData.title || editingSection?.title || ""}
+              onChange={handleInputChange}
             />
           </div>
 
@@ -313,12 +356,25 @@ const SingleInsight = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Section Logo
             </label>
-            <Upload maxCount={1} showUploadList={false}>
+            <Upload
+              maxCount={1}
+              showUploadList={false}
+              beforeUpload={handleImageUpload}
+            >
               <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg">
-                {editingSection?.logo ? (
+                {formData.image ? (
                   <div className="flex flex-col items-center">
                     <img
-                      src={editingSection.logo}
+                      src={URL.createObjectURL(formData.image)}
+                      alt="Preview"
+                      className="w-20 h-20 object-contain mb-2"
+                    />
+                    <Button icon={<UploadOutlined />}>Change Logo</Button>
+                  </div>
+                ) : editingSection?.image ? (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={getImageUrl(editingSection.image)}
                       alt="Preview"
                       className="w-20 h-20 object-contain mb-2"
                     />
@@ -345,13 +401,25 @@ const SingleInsight = () => {
         footer={null}
         width={800}
       >
-        <Form form={form} layout="vertical" className="space-y-4">
+        <Form
+          form={form}
+          layout="vertical"
+          className="space-y-4"
+          initialValues={{
+            bars: selectedSection?.bars?.length
+              ? selectedSection?.bars?.map((bar) => ({
+                  title: bar?.title,
+                  body: bar?.body.join("\n"),
+                }))
+              : [{}],
+          }}
+        >
           <Form.List name="bars" initialValue={[{}]}>
             {(fields, { add, remove }) => (
               <div className="space-y-4">
-                {fields.map((field, index) => (
+                {fields.map((field) => (
                   <div
-                    key={field.key}
+                    key={`bar-${field.key}-${selectedSection?._id}`}
                     className="border p-4 rounded-lg relative"
                   >
                     <Form.Item
@@ -376,15 +444,13 @@ const SingleInsight = () => {
                       />
                     </Form.Item>
 
-                    {fields.length > 1 && (
-                      <Button
-                        type="text"
-                        className="absolute top-2 right-2"
-                        danger
-                        icon={<MinusCircleOutlined />}
-                        onClick={() => remove(field.name)}
-                      />
-                    )}
+                    <Button
+                      type="text"
+                      className="absolute top-2 right-2"
+                      danger
+                      icon={<MinusCircleOutlined />}
+                      onClick={() => remove(field.name)}
+                    />
                   </div>
                 ))}
 
@@ -419,7 +485,10 @@ const SingleInsight = () => {
       >
         <div className="space-y-6 mt-4">
           {viewingSection?.bars?.map((bar, index) => (
-            <Collapse key={index} className="border rounded-lg">
+            <Collapse
+              key={`${bar.title}-${index}-${viewingSection._id}`}
+              className="border rounded-lg"
+            >
               <Collapse.Panel header={bar.title}>
                 <ul className="list-disc pl-5 space-y-2">
                   {bar.body.map((point, pointIndex) => (

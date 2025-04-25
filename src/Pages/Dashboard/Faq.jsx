@@ -1,46 +1,76 @@
 import { useState } from "react";
-import { Button, Table, Modal, Input, Form } from "antd";
+import { Button, Table, Modal, Input, Form, Spin } from "antd";
 import { FaPlus } from "react-icons/fa";
+import {
+  useAddFaqMutation,
+  useAllFaqsQuery,
+  useDeleteFaqMutation,
+  useUpdateFaqMutation,
+} from "../../redux/apiSlices/faqSlice";
+import moment from "moment/moment";
+import toast from "react-hot-toast";
 
 const Faq = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState(null);
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
-  // Dummy data
-  const [faqs] = useState([
-    {
-      id: 1,
-      question: "What insurance plans do you accept?",
-      answer:
-        "We accept most major insurance plans including Medicare, Medicaid, Blue Cross Blue Shield, Aetna, and UnitedHealthcare. Please contact our office to verify your specific coverage.",
-    },
-    {
-      id: 2,
-      question: "How do I schedule an appointment?",
-      answer:
-        "You can schedule an appointment by calling our office during business hours, using our online booking system, or through our patient portal. New patients may need to complete registration forms before their first visit.",
-    },
-    {
-      id: 3,
-      question: "What are your office hours?",
-      answer:
-        "Our regular office hours are Monday through Friday from 8:00 AM to 5:00 PM. We also offer extended hours on Thursdays until 7:00 PM and select Saturday mornings for your convenience.",
-    },
-  ]);
+  // Remove dummy data as we're using real API data
+  const { data: faqsData, isLoading } = useAllFaqsQuery();
+  const [addFaq] = useAddFaqMutation();
+  const [updateFaq] = useUpdateFaqMutation();
+  const [deleteFaq] = useDeleteFaqMutation();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spin />
+      </div>
+    );
+  }
+
+  const handleDelete = async (id) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this FAQ?",
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          const response = await deleteFaq(id).unwrap();
+          if (response?.success) {
+            toast.success(response?.message || "FAQ deleted successfully!");
+          }
+        } catch (error) {
+          toast.error(error?.data?.message || "Something went wrong!");
+        }
+      },
+    });
+  };
+
+  const data = faqsData?.data;
+  console.log(data);
 
   const columns = [
     {
       title: "Question",
       dataIndex: "question",
       key: "question",
-      width: "30%",
     },
     {
       title: "Answer",
       dataIndex: "answer",
       key: "answer",
-      width: "50%",
+    },
+    {
+      title: "Uploaded At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+
+      render: (text) => moment(text).format("YYYY-MM-DD"),
     },
     {
       title: "Actions",
@@ -56,11 +86,64 @@ const Faq = () => {
           >
             Edit
           </Button>
-          <Button danger>Delete</Button>
+          <Button onClick={() => handleDelete(record._id)} danger>
+            Delete
+          </Button>
         </div>
       ),
     },
   ];
+
+  const handleAdd = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // Create the request body with the required fields
+      const data = {
+        question: values.question,
+        answer: values.answer,
+      };
+
+      console.log(data);
+
+      const response = await addFaq(data).unwrap();
+
+      if (response?.success) {
+        toast.success("FAQ added successfully!");
+        form.resetFields();
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong!");
+    }
+  };
+
+  const handleEdit = async () => {
+    try {
+      const values = await editForm.validateFields();
+
+      const data = {
+        question: values.question,
+        answer: values.answer,
+      };
+
+      const response = await updateFaq({
+        id: editingFaq._id,
+        data: data,
+      }).unwrap();
+
+      if (response?.success) {
+        toast.success("FAQ updated successfully!");
+        editForm.resetFields();
+        setIsEditModalOpen(false);
+        setEditingFaq(null);
+      } else {
+        toast.error(response?.message || "Failed to update FAQ");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong!");
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -72,13 +155,13 @@ const Faq = () => {
             icon={<FaPlus />}
             onClick={() => setIsModalOpen(true)}
           >
-            Add FAQ
+            Add FAQs
           </Button>
         </div>
         <Table
           columns={columns}
-          dataSource={faqs}
-          rowKey="id"
+          dataSource={data}
+          rowKey="_id"
           pagination={false}
         />
       </div>
@@ -87,59 +170,64 @@ const Faq = () => {
       <Modal
         title="Add New FAQ"
         open={isModalOpen}
-        onOk={() => setIsModalOpen(false)}
-        onCancel={() => setIsModalOpen(false)}
+        onOk={handleAdd}
+        onCancel={() => {
+          setIsModalOpen(false);
+          form.resetFields();
+        }}
       >
-        <div className="space-y-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Question
-            </label>
+        <Form form={form} layout="vertical" className="space-y-4 mb-4">
+          <Form.Item
+            label="Question"
+            name="question"
+            rules={[{ required: true, message: "Please enter the question" }]}
+          >
             <Input.TextArea placeholder="Enter your question" rows={3} />
-          </div>
+          </Form.Item>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Answer
-            </label>
+          <Form.Item
+            label="Answer"
+            name="answer"
+            rules={[{ required: true, message: "Please enter the answer" }]}
+          >
             <Input.TextArea placeholder="Enter the answer" rows={6} />
-          </div>
-        </div>
+          </Form.Item>
+        </Form>
       </Modal>
 
       {/* Edit FAQ Modal */}
       <Modal
         title="Edit FAQ"
         open={isEditModalOpen}
-        onOk={() => setIsEditModalOpen(false)}
+        onOk={handleEdit}
         onCancel={() => {
           setIsEditModalOpen(false);
           setEditingFaq(null);
+          editForm.resetFields();
         }}
       >
-        <div className="space-y-4 mb-10 my-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Question
-            </label>
-            <Input.TextArea
-              placeholder="Enter your question"
-              rows={3}
-              defaultValue={editingFaq?.question}
-            />
-          </div>
+        <Form
+          form={editForm}
+          layout="vertical"
+          className="space-y-4 mb-10 my-4"
+          initialValues={editingFaq}
+        >
+          <Form.Item
+            label="Question"
+            name="question"
+            rules={[{ required: true, message: "Please enter the question" }]}
+          >
+            <Input.TextArea placeholder="Enter your question" rows={3} />
+          </Form.Item>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Answer
-            </label>
-            <Input.TextArea
-              placeholder="Enter the answer"
-              rows={6}
-              defaultValue={editingFaq?.answer}
-            />
-          </div>
-        </div>
+          <Form.Item
+            label="Answer"
+            name="answer"
+            rules={[{ required: true, message: "Please enter the answer" }]}
+          >
+            <Input.TextArea placeholder="Enter the answer" rows={6} />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

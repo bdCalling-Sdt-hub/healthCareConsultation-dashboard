@@ -33,6 +33,72 @@ const insightsSlice = api.injectEndpoints({
       },
       invalidatesTags: ["Insights"],
     }),
+
+    deleteInsight: builder.mutation({
+      query: (id) => {
+        return {
+          method: "DELETE",
+          url: `/insights/${id}`,
+        };
+      },
+      invalidatesTags: ["Insights"],
+    }),
+
+    // sections
+    getAllSectionsByInsightId: builder.query({
+      query: (id) => {
+        return {
+          method: "GET",
+          url: `/insights/sections/${id}`,
+        };
+      },
+      providesTags: ["Sections"],
+    }),
+
+    createSection: builder.mutation({
+      query: ({ data, id }) => {
+        return {
+          method: "POST",
+          url: `/insights/sections/${id}`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["Sections"],
+    }),
+
+    updateSection: builder.mutation({
+      query: ({ id, data }) => {
+        return {
+          method: "PATCH",
+          url: `/insights/sections/${id}`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["Sections"],
+    }),
+
+    deleteSection: builder.mutation({
+      query: (id) => {
+        return {
+          method: "DELETE",
+          url: `/insights/sections/${id}`,
+        };
+      },
+      invalidatesTags: ["Sections"],
+    }),
+
+    //bars
+
+    createBars: builder.mutation({
+      query: ({ data, id }) => {
+        return {
+          method: "POST",
+          url: `/insights/sections/bars/${id}`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["Sections", "Insights"],
+    }),
   }),
 });
 
@@ -40,4 +106,14 @@ export const {
   useInsightsQuery,
   useCreateInsightMutation,
   useUpdateInsightMutation,
+  useDeleteInsightMutation,
+
+  // sections
+  useGetAllSectionsByInsightIdQuery,
+  useCreateSectionMutation,
+  useUpdateSectionMutation,
+  useDeleteSectionMutation,
+
+  // bars
+  useCreateBarsMutation,
 } = insightsSlice;

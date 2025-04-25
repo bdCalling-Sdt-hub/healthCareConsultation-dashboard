@@ -10,14 +10,16 @@ const userSlice = api.injectEndpoints({
         };
       },
     }),
+
     users: builder.query({
       query: () => {
         return {
           method: "GET",
-          url: "/user",
+          url: "/user/all-users",
         };
       },
     }),
+
     vendors: builder.query({
       query: () => {
         return {
@@ -26,6 +28,7 @@ const userSlice = api.injectEndpoints({
         };
       },
     }),
+
     userById: builder.query({
       query: (id) => {
         return {

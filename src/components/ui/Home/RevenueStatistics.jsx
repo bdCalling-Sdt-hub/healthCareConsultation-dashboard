@@ -8,23 +8,35 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useRevenueStatesQuery } from "../../../redux/apiSlices/dashboardSlice";
+import salongoLogo from "../../../assets/salon-go-logo.png";
 
-const data = [
-  { name: "Jan", uv: 4000 },
-  { name: "Feb", uv: 3000 },
-  { name: "Mar", uv: 2000 },
-  { name: "Apr", uv: 2780 },
-  { name: "May", uv: 5890 },
-  { name: "Jun", uv: 2390 },
-  { name: "Jul", uv: 3490 },
-  { name: "Aug", uv: 2490 },
-  { name: "Sep", uv: 1490 },
-  { name: "Oct", uv: 4490 },
-  { name: "Nov", uv: 3490 },
-  { name: "Dec", uv: 1490 },
+const monthNames = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
 const RevenueStatistics = () => {
+  const { data: revenueData, isLoading, error } = useRevenueStatesQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <img src={salongoLogo} alt="" className="w-20" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error loading revenue statistics</div>;
+  }
+
+  // Transform the data to use month names
+  const data = revenueData?.data?.monthlyRevenue?.map(item => ({
+    ...item,
+    month: monthNames[parseInt(item.month) - 1] // Convert month number to name
+  })) || [];
+
   return (
     <div
       style={{ width: "100%", height: 350 }}
@@ -44,12 +56,12 @@ const RevenueStatistics = () => {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
           <Area
             type="monotone"
-            dataKey="uv"
+            dataKey="revenue"
             stroke="#15405D"
             fill="url(#colorUv)"
           />

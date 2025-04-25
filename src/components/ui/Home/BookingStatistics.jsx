@@ -1,11 +1,7 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-
-const data = [
-  { name: "Completed Bookings", value: 400 },
-  { name: "Pending Bookings", value: 300 },
-  { name: "Canceled Bookings", value: 200 },
-];
+import { useBookingStatisticsQuery } from "../../../redux/apiSlices/dashboardSlice";
+import salongoLogo from "../../../assets/salon-go-logo.png";
 
 const COLORS = ["#15405d", "#336484", "#1b2f3d"];
 
@@ -37,9 +33,38 @@ const renderCustomizedLabel = ({
 };
 
 const BookingStatistics = () => {
+  const { data: bookingStats, isLoading, error } = useBookingStatisticsQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <img src={salongoLogo} alt="" className="w-20" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error loading booking statistics</div>;
+  }
+
+  // Transform the API data into the format required by the pie chart
+  const data = [
+    {
+      name: "Completed Bookings",
+      value: bookingStats?.data?.completedRate || 0,
+    },
+    { name: "Pending Bookings", value: bookingStats?.data?.pendingRate || 0 },
+    {
+      name: "Canceled Bookings",
+      value: bookingStats?.data?.cancelledRate || 0,
+    },
+  ].filter((item) => item.value > 0); // Only show segments with values > 0
+
   return (
     <div className="flex flex-col items-center bg-white rounded-2xl p-4">
-      <h1 className="text-xl font-semibold">Booking Statistics</h1>
+      <h1 className="text-xl font-semibold">
+        Booking Statistics ({bookingStats?.data?.totalBookings || 0} Total)
+      </h1>
       <ResponsiveContainer width="100%" height={240}>
         <PieChart>
           <Pie
@@ -65,9 +90,11 @@ const BookingStatistics = () => {
           <div key={index} className="flex items-center space-x-2">
             <span
               className="w-4 h-4 inline-block rounded-full"
-              style={{ backgroundColor: COLORS[index] }}
+              style={{ backgroundColor: COLORS[index % COLORS.length] }}
             ></span>
-            <span className="text-sm">{entry.name}</span>
+            <span className="text-sm">
+              {entry.name} ({entry.value}%)
+            </span>
           </div>
         ))}
       </div>
