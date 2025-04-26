@@ -7,22 +7,24 @@ import {
 } from "../../redux/apiSlices/termsAndConditionSlice";
 import toast from "react-hot-toast";
 import rentMeLogo from "../../assets/navLogo.png";
+import {
+  usePrivacyPolicyQuery,
+  useUpdatePricyPolicyMutation,
+} from "../../redux/apiSlices/privacyPolicySlice";
 
 const PrivacyPolicy = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
 
-  const isLoading = false;
+  const { data: privacyPolicy, isLoading, refetch } = usePrivacyPolicyQuery();
 
-  // const {
-  //   data: termsAndCondition,
-  //   isLoading,
-  //   refetch,
-  // } = useTermsAndConditionQuery(selectedTab);
+  const [updatePrivacyPolicy] = useUpdatePricyPolicyMutation();
 
-  // const [updateTermsAndConditions] = useUpdateTermsAndConditionsMutation();
-
-  const termsAndCondition = [];
+  useEffect(() => {
+    if (privacyPolicy?.content) {
+      setContent(privacyPolicy?.content);
+    }
+  }, [privacyPolicy]);
 
   if (isLoading) {
     return (
@@ -32,24 +34,22 @@ const PrivacyPolicy = () => {
     );
   }
 
-  const termsAndConditionData = termsAndCondition?.content;
-
   const termsDataSave = async () => {
     const data = {
       content: content,
+      type: "privacy-policy",
     };
 
     try {
-      const res = await updateTermsAndConditions(data).unwrap();
+      const res = await updatePrivacyPolicy(data).unwrap();
       if (res.success) {
-        toast.success("Terms and Conditions updated successfully");
-        setContent(res.data.content);
+        toast.success("Privacy Policy updated successfully");
         refetch();
       } else {
-        toast.error("Something went wrong");
+        toast.error(res?.message || "Something went wrong");
       }
-    } catch {
-      throw new Error("Something Is wrong at try");
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong!");
     }
   };
 
@@ -59,7 +59,7 @@ const PrivacyPolicy = () => {
 
       <JoditEditor
         ref={editor}
-        value={content}
+        value={privacyPolicy?.content}
         onChange={(newContent) => {
           setContent(newContent);
         }}

@@ -79,7 +79,7 @@ const authSlice = api.injectEndpoints({
       query: (data) => {
         return {
           method: "PATCH",
-          url: "/admin/profile",
+          url: "/user/profile",
           body: data,
           headers: {
             Authorization: `Bearer ${JSON.parse(
@@ -117,6 +117,16 @@ const authSlice = api.injectEndpoints({
         };
       },
     }),
+
+    updateAdminInfo: builder.mutation({
+      query: (data) => {
+        return {
+          method: "PATCH",
+          url: "/user/profile",
+          body: data,
+        };
+      },
+    }),
   }),
 });
 
@@ -130,4 +140,5 @@ export const {
   useProfileQuery,
   useUpdateAdminProfileMutation,
   useFetchAdminProfileQuery,
+  useUpdateAdminInfoMutation,
 } = authSlice;

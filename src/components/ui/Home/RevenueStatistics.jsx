@@ -10,10 +10,21 @@ import {
 } from "recharts";
 import { useRevenueStatesQuery } from "../../../redux/apiSlices/dashboardSlice";
 import salongoLogo from "../../../assets/salon-go-logo.png";
+import { Spin } from "antd";
 
 const monthNames = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 const RevenueStatistics = () => {
@@ -22,7 +33,7 @@ const RevenueStatistics = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <img src={salongoLogo} alt="" className="w-20" />
+        <Spin />
       </div>
     );
   }
@@ -32,10 +43,11 @@ const RevenueStatistics = () => {
   }
 
   // Transform the data to use month names
-  const data = revenueData?.data?.monthlyRevenue?.map(item => ({
-    ...item,
-    month: monthNames[parseInt(item.month) - 1] // Convert month number to name
-  })) || [];
+  const data =
+    revenueData?.data?.monthlyRevenue?.map((item) => ({
+      ...item,
+      month: monthNames[parseInt(item.month) - 1], // Convert month number to name
+    })) || [];
 
   return (
     <div

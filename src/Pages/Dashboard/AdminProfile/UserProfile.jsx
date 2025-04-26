@@ -11,9 +11,8 @@ import {
 } from "../../../redux/apiSlices/authSlice";
 import logo from "../../../assets/randomProfile2.jpg";
 import toast from "react-hot-toast";
-import rentMeLogo from "../../../assets/navLogo.png";
-
-const baseUrl = import.meta.env.VITE_BASE_URL;
+import logo2 from "../../../assets/logo.png";
+import { imageUrl } from "../../../redux/api/baseApi";
 
 const PersonalInfo = () => {
   const [contact, setContact] = useState("");
@@ -21,14 +20,11 @@ const PersonalInfo = () => {
   const [file, setFile] = useState(null);
   const [form] = Form.useForm();
 
-  const isLoading = false;
-
-  // const { data: fetchAdminProfile, isLoading } = useFetchAdminProfileQuery();
-  // const [updateAdminProfile] = useUpdateAdminProfileMutation();
-
-  const fetchAdminProfile = [];
+  const { data: fetchAdminProfile, isLoading } = useFetchAdminProfileQuery();
+  const [updateAdminProfile] = useUpdateAdminProfileMutation();
 
   const adminData = fetchAdminProfile?.data;
+  console.log(adminData);
 
   useEffect(() => {
     if (adminData) {
@@ -36,17 +32,20 @@ const PersonalInfo = () => {
         name: adminData?.name,
         email: adminData?.email,
         address: adminData?.address,
-        phone: adminData?.contact,
+        phone: adminData?.phone,
       });
-      setImgURL(`${baseUrl}${adminData?.profileImg}`);
-      setContact(adminData?.contact);
+      setImgURL(
+        adminData?.profile?.startsWith("http")
+          ? adminData?.profile
+          : `${imageUrl}${adminData?.profile}`
+      );
     }
   }, [form, adminData]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={rentMeLogo} alt="" />
+        <img src={logo2} alt="" />
       </div>
     );
   }
@@ -65,8 +64,8 @@ const PersonalInfo = () => {
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("email", values.email);
-      formData.append("address", values.address);
-      formData.append("contact", contact);
+      formData.append("location", values.address);
+      formData.append("contact", values.phone);
 
       if (file) {
         formData.append("image", file);
@@ -139,13 +138,7 @@ const PersonalInfo = () => {
                 { required: true, message: "Please enter your phone number" },
               ]}
             >
-              <PhoneInput
-                country="us"
-                value={contact}
-                onChange={setContact}
-                inputClass="!w-full !px-4 !py-3 !py-5 !ps-12 !border !border-gray-300 !rounded-lg !focus:outline-none !focus:ring-2 !focus:ring-blue-400"
-                containerClass="!w-full"
-              />
+              <Input className="py-3 bg-gray-100 rounded-xl" />
             </Form.Item>
 
             <Form.Item>

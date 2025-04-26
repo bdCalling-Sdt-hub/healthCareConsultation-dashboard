@@ -12,17 +12,19 @@ const TermsAndCondition = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
 
-  const isLoading = false;
+  const {
+    data: termsAndCondition,
+    isLoading,
+    refetch,
+  } = useTermsAndConditionQuery();
 
-  // const {
-  //   data: termsAndCondition,
-  //   isLoading,
-  //   refetch,
-  // } = useTermsAndConditionQuery(selectedTab);
+  const [updateTermsAndConditions] = useUpdateTermsAndConditionsMutation();
 
-  // const [updateTermsAndConditions] = useUpdateTermsAndConditionsMutation();
-
-  const termsAndCondition = [];
+  useEffect(() => {
+    if (termsAndCondition?.content) {
+      setContent(termsAndCondition?.content);
+    }
+  }, [termsAndCondition]);
 
   if (isLoading) {
     return (
@@ -32,24 +34,24 @@ const TermsAndCondition = () => {
     );
   }
 
-  const termsAndConditionData = termsAndCondition?.content;
+  console.log(termsAndCondition?.content);
 
   const termsDataSave = async () => {
     const data = {
       content: content,
+      type: "terms-and-condition",
     };
 
     try {
       const res = await updateTermsAndConditions(data).unwrap();
       if (res.success) {
         toast.success("Terms and Conditions updated successfully");
-        setContent(res.data.content);
         refetch();
       } else {
-        toast.error("Something went wrong");
+        toast.error(res?.message || "Something went wrong");
       }
-    } catch {
-      throw new Error("Something Is wrong at try");
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong!");
     }
   };
 
@@ -59,7 +61,7 @@ const TermsAndCondition = () => {
 
       <JoditEditor
         ref={editor}
-        value={content}
+        value={termsAndCondition?.content}
         onChange={(newContent) => {
           setContent(newContent);
         }}

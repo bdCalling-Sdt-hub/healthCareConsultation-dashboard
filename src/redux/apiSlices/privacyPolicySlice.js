@@ -5,7 +5,7 @@ const privacyPolicySlice = api.injectEndpoints({
     updatePricyPolicy: builder.mutation({
       query: (data) => {
         return {
-          url: `/others/privacy-policy`,
+          url: `/public`,
           method: "POST",
           body: data,
           headers: {
@@ -17,9 +17,9 @@ const privacyPolicySlice = api.injectEndpoints({
       },
     }),
     privacyPolicy: builder.query({
-      query: (userType) => {
+      query: () => {
         return {
-          url: `/others/privacy-policy/${userType}`,
+          url: `/public/privacy-policy`,
           method: "GET",
           headers: {
             Authorization: `Bearer ${JSON.parse(
