@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Spin } from "antd";
 import { BiLeftArrowAlt } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
@@ -45,7 +45,7 @@ const PersonalInfo = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={logo2} alt="" />
+        <Spin />
       </div>
     );
   }
@@ -64,24 +64,31 @@ const PersonalInfo = () => {
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("email", values.email);
-      formData.append("location", values.address);
+      formData.append("address", values.address);
       formData.append("contact", values.phone);
 
       if (file) {
         formData.append("image", file);
-      } else {
+      } else if (imgURL) {
         formData.append("imageUrl", imgURL);
       }
 
-      const response = await updateAdminProfile(formData);
+      // Modified response handling
+      const response = await updateAdminProfile(formData).unwrap();
 
-      if (response.data) {
-        toast.success(response?.data?.message);
+      if (response?.success) {
+        toast.success(response?.message || "Profile updated successfully");
       } else {
-        toast.error(response?.data?.message);
+        toast.error(response?.message || "Update failed");
       }
     } catch (error) {
-      console.error("Error updating form:", error);
+      // Improved error handling
+      console.error("Update error:", error);
+      toast.error(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to update profile. Please try again."
+      );
     }
   };
 

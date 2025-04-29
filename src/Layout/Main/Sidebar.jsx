@@ -71,6 +71,11 @@ const Sidebar = () => {
       label: <Link to="/insights">Insights</Link>,
     },
     {
+      key: "/our-way",
+      icon: <MdInsights size={24} />,
+      label: <Link to="/our-way">Our Way</Link>,
+    },
+    {
       key: "/users",
       icon: <TbUserScreen size={24} />,
       label: <Link to="/users">Users</Link>,

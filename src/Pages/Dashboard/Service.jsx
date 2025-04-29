@@ -88,13 +88,17 @@ const Service = () => {
       // Create FormData
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
+
+      // Handle image upload
       if (image) {
         formData.append("image", image);
       }
-      if (videos.length) {
+
+      // Handle video uploads - only append actual video files
+      if (videos) {
         videos.forEach((video) => {
           if (video) {
-            formData.append(`media`, video);
+            formData.append("media", video);
           }
         });
       }
@@ -263,11 +267,11 @@ const Service = () => {
             )}
 
             {/* Videos Section */}
-            {selectedTab.videos && selectedTab.videos.length > 0 && (
+            {selectedTab?.videos && selectedTab?.videos?.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-xl font-semibold mb-3">Videos</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {selectedTab.videos.map((video, index) => (
+                  {selectedTab?.videos?.map((video, index) => (
                     <video key={index} controls className="w-full rounded-lg">
                       <source src={getImageUrl(video)} type="video/mp4" />
                       Your browser does not support the video tag.

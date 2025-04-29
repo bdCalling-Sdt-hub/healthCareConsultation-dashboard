@@ -110,7 +110,7 @@ const Users = () => {
         {selectedUser && (
           <div className="flex flex-col gap-3 p-4">
             <img
-              src={selectedUser.profileImg || randomImg}
+              src={getImageUrl(selectedUser.profile) || randomImg}
               alt={selectedUser.name}
               className="w-44 h-40 rounded-2xl"
             />

@@ -22,6 +22,7 @@ import SingleInsight from "../Pages/Dashboard/SingleInsight";
 import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy";
 import Faq from "../Pages/Dashboard/Faq";
 import PrivateRoute from "./PrivateRoute";
+import OurWay from "../Pages/Dashboard/OurWay";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "/insights",
         element: <Insights />,
+      },
+      {
+        path: "/our-way",
+        element: <OurWay />,
       },
       {
         path: "/insights/:id",
