@@ -10,7 +10,7 @@ import {
   MdMiscellaneousServices,
 } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AiOutlineTransaction } from "react-icons/ai";
+import { AiOutlineGateway, AiOutlineTransaction } from "react-icons/ai";
 import { TbUserScreen } from "react-icons/tb";
 import { IoIosLogOut } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -72,7 +72,7 @@ const Sidebar = () => {
     },
     {
       key: "/our-way",
-      icon: <MdInsights size={24} />,
+      icon: <AiOutlineGateway size={24} />,
       label: <Link to="/our-way">Our Way</Link>,
     },
     {
@@ -101,6 +101,14 @@ const Sidebar = () => {
           label: (
             <Link to="/change-password" className="text-white hover:text-white">
               Change Password
+            </Link>
+          ),
+        },
+        {
+          key: "/reviews",
+          label: (
+            <Link to="/reviews" className="text-white hover:text-white">
+              Reviews
             </Link>
           ),
         },

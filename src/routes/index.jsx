@@ -23,6 +23,7 @@ import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy";
 import Faq from "../Pages/Dashboard/Faq";
 import PrivateRoute from "./PrivateRoute";
 import OurWay from "../Pages/Dashboard/OurWay";
+import Review from "../Pages/Dashboard/review";
 
 const router = createBrowserRouter([
   {
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
       {
         path: "/change-password",
         element: <ChangePassword />,
+      },
+      {
+        path: "/reviews",
+        element: <Review />,
       },
       {
         path: "/privacy-policy",
