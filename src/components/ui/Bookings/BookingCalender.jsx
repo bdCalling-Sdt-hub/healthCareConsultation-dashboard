@@ -33,7 +33,7 @@ const BookingCalendar = () => {
   // State to hold bookings
   const [bookings, setBookings] = useState([
     {
-      date: "2025-04-15",
+      date: "2025-05-15",
       startTime: "10:00",
       endTime: "11:00",
       title: "Check-up",
@@ -41,7 +41,7 @@ const BookingCalendar = () => {
       clientMessage: "Please arrive 15 minutes early to complete paperwork.",
     },
     {
-      date: "2025-04-16",
+      date: "2025-05-16",
       startTime: "14:00",
       endTime: "15:00",
       title: "Vaccination",
@@ -49,7 +49,7 @@ const BookingCalendar = () => {
       clientMessage: "Bring your vaccination history if available.",
     },
     {
-      date: "2025-04-18",
+      date: "2025-05-18",
       startTime: "13:00",
       endTime: "14:00",
       title: "Dermatology Consultation",
