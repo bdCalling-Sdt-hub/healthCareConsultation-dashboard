@@ -40,7 +40,9 @@ const Professionals = () => {
               </div>
             </div>
 
-            <p className="text-sm font-medium">{value?.percentage}%</p>
+            <p className="text-sm font-medium">
+              {value?.percentage?.toFixed(2)}%
+            </p>
           </div>
         ))}
       </div>

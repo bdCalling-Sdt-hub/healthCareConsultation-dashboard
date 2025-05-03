@@ -106,7 +106,7 @@ const Bookings = () => {
           />
         </TabPane>
         <TabPane tab="Booking Timetable" key="3">
-          <BookingCalendar />
+          <BookingCalendar bookingsData={bookingsData} />
         </TabPane>
       </Tabs>
 

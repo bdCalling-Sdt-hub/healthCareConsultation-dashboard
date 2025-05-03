@@ -21,6 +21,16 @@ const bookingSlice = api.injectEndpoints({
       providesTags: ["slots"],
     }),
 
+    getSlotsByDate: builder.query({
+      query: ({ date, timeZone }) => {
+        return {
+          method: "GET",
+          url: `/user/schedule/${date}?timezone=${timeZone}`,
+        };
+      },
+      providesTags: ["slots"],
+    }),
+
     manageSlots: builder.mutation({
       query: (date) => {
         return {
@@ -34,5 +44,9 @@ const bookingSlice = api.injectEndpoints({
   }),
 });
 
-export const { useAllBookingsQuery, useGetSlotsQuery, useManageSlotsMutation } =
-  bookingSlice;
+export const {
+  useAllBookingsQuery,
+  useGetSlotsQuery,
+  useGetSlotsByDateQuery,
+  useManageSlotsMutation,
+} = bookingSlice;
