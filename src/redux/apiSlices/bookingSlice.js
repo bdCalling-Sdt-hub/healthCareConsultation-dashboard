@@ -11,6 +11,17 @@ const bookingSlice = api.injectEndpoints({
       },
     }),
 
+    updateBookings: builder.mutation({
+      query: ({ data, id }) => {
+        return {
+          method: "PATCH",
+          url: `/bookings/${id}`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["bookings"],
+    }),
+
     getSlots: builder.query({
       query: () => {
         return {
@@ -47,6 +58,7 @@ const bookingSlice = api.injectEndpoints({
 export const {
   useAllBookingsQuery,
   useGetSlotsQuery,
+  useUpdateBookingsMutation,
   useGetSlotsByDateQuery,
   useManageSlotsMutation,
 } = bookingSlice;

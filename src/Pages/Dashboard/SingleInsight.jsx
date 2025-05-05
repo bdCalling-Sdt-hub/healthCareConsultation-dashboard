@@ -54,6 +54,7 @@ const SingleInsight = () => {
 
   const sections = getInsightData?.data;
   const insightData = sections?.[0]?.insight || {};
+  console.log(insightData);
 
   // Table columns configuration
   const columns = [

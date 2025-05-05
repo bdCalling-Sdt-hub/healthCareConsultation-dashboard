@@ -1,6 +1,21 @@
 import React, { useState } from "react";
-import { Table, Button, Modal, Spin, message } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Button,
+  Modal,
+  Spin,
+  message,
+  Form,
+  Input,
+  Card,
+  Typography,
+} from "antd";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 import AddAndEditInsightModal from "../../components/ui/Insights/AddAndEditInsightModal";
 import { FaEye } from "react-icons/fa6";
 import { Link } from "react-router-dom";
@@ -12,9 +27,25 @@ import {
 import { getImageUrl } from "../../utils/getImageUrl";
 import moment from "moment";
 
+const { Title } = Typography;
+
 const InsightsPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingInsight, setEditingInsight] = useState(null);
+  const [growthData, setGrowthData] = useState([
+    { month: "Jan", value: 0 },
+    { month: "Feb", value: 0 },
+    { month: "Mar", value: 0 },
+    { month: "Apr", value: 0 },
+    { month: "May", value: 0 },
+    { month: "Jun", value: 0 },
+    { month: "Jul", value: 0 },
+    { month: "Aug", value: 0 },
+    { month: "Sep", value: 0 },
+    { month: "Oct", value: 0 },
+    { month: "Nov", value: 0 },
+    { month: "Dec", value: 0 },
+  ]);
 
   // console.log(editingInsight);
 
@@ -60,6 +91,26 @@ const InsightsPage = () => {
     setIsModalVisible(true);
   };
 
+  const handleGrowthDataChange = (index, value) => {
+    const newData = [...growthData];
+    newData[index].value = parseInt(value) || 0;
+    setGrowthData(newData);
+  };
+
+  const handleSaveGrowthData = () => {
+    // Here you would typically save the data to your backend
+    console.log("Growth data to save:", growthData);
+    message.success("Growth data saved successfully!");
+
+    // You can add API call here to save the data
+    // For example:
+    // saveGrowthData(growthData).then(() => {
+    //   message.success("Growth data saved successfully!");
+    // }).catch(error => {
+    //   message.error("Failed to save growth data");
+    // });
+  };
+
   const columns = [
     {
       title: "SL No.",
@@ -72,7 +123,11 @@ const InsightsPage = () => {
       dataIndex: "image",
       key: "image",
       render: (image) => (
-        <img src={getImageUrl(image)} alt="" className="w-20 h-16 rounded-md" />
+        <img
+          src={getImageUrl(image)}
+          alt=""
+          className="w-20 h-16 object-cover rounded-md"
+        />
       ),
     },
     { title: "Title", dataIndex: "title", key: "title" },
@@ -122,6 +177,47 @@ const InsightsPage = () => {
         dataSource={allInsights}
         pagination={{ pageSize: 5 }}
       />
+
+      <div className="mt-8">
+        <Card className="shadow-sm">
+          <Title level={4} className="mb-4">
+            Growth Rate Data
+          </Title>
+          <p className="text-gray-600 mb-4">
+            Enter monthly growth rate values for the website performance chart.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {growthData.map((item, index) => (
+              <div key={item.month} className="mb-4">
+                <Form.Item label={item.month} className="mb-1">
+                  <Input
+                    type="number"
+                    value={item.value}
+                    onChange={(e) =>
+                      handleGrowthDataChange(index, e.target.value)
+                    }
+                    addonBefore={item.month}
+                    placeholder="Enter value"
+                  />
+                </Form.Item>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={handleSaveGrowthData}
+              className="bg-primary"
+            >
+              Save Growth Data
+            </Button>
+          </div>
+        </Card>
+      </div>
+
       <AddAndEditInsightModal
         visible={isModalVisible}
         onClose={() => {

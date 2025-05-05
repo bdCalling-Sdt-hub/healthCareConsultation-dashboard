@@ -23,14 +23,20 @@ import {
   LinkOutlined,
   ClockCircleOutlined,
   CalendarOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useGetSlotsByDateQuery } from "../../../redux/apiSlices/bookingSlice";
+import {
+  useGetSlotsByDateQuery,
+  useUpdateBookingsMutation,
+} from "../../../redux/apiSlices/bookingSlice";
 
 const { Option } = Select;
 const { Text, Title } = Typography;
 
 const BookingCalendar = ({ bookingsData }) => {
+  console.log("bookingData", bookingsData);
+
   // Convert timeCode to time format
   const getTimeFromCode = (timeCode) => {
     const hours = Math.floor(timeCode / 100);
@@ -50,6 +56,8 @@ const BookingCalendar = ({ bookingsData }) => {
     // { skip: !selectedDate }
   );
 
+  const [updateBookings] = useUpdateBookingsMutation();
+
   // Format bookings data
   const formatBookings = (data) => {
     if (!data || !Array.isArray(data)) return [];
@@ -57,21 +65,24 @@ const BookingCalendar = ({ bookingsData }) => {
     return data.map((booking) => ({
       id: booking._id,
       date: dayjs(booking.scheduledAt).format("YYYY-MM-DD"),
-      startTime: getTimeFromCode(booking.timeCode),
-      endTime: getTimeFromCode(booking.timeCode + 100), // Assuming 1 hour duration
+      time: dayjs(booking.scheduledAt).format("HH:mm"),
+      // startTime: getTimeFromCode(booking.timeCode),
+      // endTime: getTimeFromCode(booking.timeCode + 100), // Assuming 1 hour duration
       title: booking.service?.title || "Appointment",
-      meetingType: booking.paymentRequired ? "online" : "physical",
+      paymentMethod: booking.paymentMethod || "physical",
       price: booking.fee,
       clientMessage: booking.message,
       firstName: booking.firstName,
       lastName: booking.lastName,
       email: booking.email,
       contact: booking.contact,
+      link: booking.link,
       status: booking.status,
       industry: booking.industry,
       country: booking.country,
       state: booking.state,
       timezone: booking.timezone, // Add timezone property
+      note: booking.note, // Admin note (your instructions to client)
     }));
   };
 
@@ -99,21 +110,21 @@ const BookingCalendar = ({ bookingsData }) => {
   // Update available slots when slots data changes
   useEffect(() => {
     if (slotsData?.data && slotsData.data.length > 0) {
-      const slots = [];
+      // const slots = [];
 
       // Extract available slots from API response
-      slotsData.data.forEach((dayData) => {
-        dayData.times.forEach((timeSlot) => {
-          if (!timeSlot.isBooked) {
-            slots.push({
-              time: timeSlot.time,
-              timeCode: timeSlot.timeCode,
-            });
-          }
-        });
-      });
+      // slotsData.data.forEach((dayData) => {
+      //   dayData.times.forEach((timeSlot) => {
+      //     if (!timeSlot.isBooked) {
+      //       slots.push({
+      //         time: timeSlot.time,
+      //         timeCode: timeSlot.timeCode,
+      //       });
+      //     }
+      //   });
+      // });
 
-      setAvailableSlots(slots);
+      setAvailableSlots(slotsData?.data[0]?.times || []);
     }
   }, [slotsData]);
 
@@ -139,17 +150,21 @@ const BookingCalendar = ({ bookingsData }) => {
 
     const booking = bookings[index];
     setEditingBooking(index);
-    setMeetingType(booking.meetingType || "physical");
+    setMeetingType(booking.paymentMethod || "physical");
     setIsModalOpen(true);
+
+    console.log("asdfvsdvsdv", booking);
 
     // Set initial values in the form
     form.setFieldsValue({
       date: dayjs(booking.date),
-      timeSlot: `${booking.startTime}-${booking.endTime}`,
-      meetingType: booking.meetingType || "physical",
+      timeSlot: booking.time,
+      paymentMethod: booking.paymentMethod || "physical",
       price: booking.price,
-      meetingLink: booking.meetingLink,
+      link: booking.link, // Changed from meetingLink to link
       title: booking.title,
+      message: booking.clientMessage, // Client's message
+      adminNote: booking.note, // Admin note (your instructions to client)
     });
 
     // Set selected date for API query
@@ -173,40 +188,67 @@ const BookingCalendar = ({ bookingsData }) => {
     }
   };
 
-  // Handle meeting type change
-  const handleMeetingTypeChange = (e) => {
+  // Handle payment method change
+  const handlePaymentMethodChange = (e) => {
     setMeetingType(e.target.value);
   };
 
   // Handle booking update
   const handleFinish = (values) => {
-    const [startTime, endTime] = values.timeSlot.split("-");
+    // Find the selected time slot to get the timeCode
+    const selectedSlot = availableSlots.find(
+      (slot) => slot.time === values.timeSlot
+    );
+    const timeCode = selectedSlot ? selectedSlot.timeCode : null;
 
-    const updatedBooking = {
-      ...bookings[editingBooking],
-      date: values.date.format("YYYY-MM-DD"),
-      startTime,
-      endTime,
-      title: values.title,
-      meetingType: values.meetingType,
-      meetingLink: values.meetingLink,
-      clientMessage: values.clientMessage,
-    };
-
-    // Add online-specific fields if meeting type is online
-    if (values.meetingType === "online") {
-      updatedBooking.price = values.price;
-    } else {
-      // Remove online-specific fields if meeting type is physical
-      delete updatedBooking.price;
+    if (!timeCode) {
+      console.error("Could not find timeCode for the selected time slot");
+      return;
     }
 
-    // Update the booking in the array
-    const updatedBookings = [...bookings];
-    updatedBookings[editingBooking] = updatedBooking;
-    setBookings(updatedBookings);
+    // Create the updated booking data according to the required format
+    const updateData = {
+      date: values.date.format("YYYY-MM-DD"),
+      time: values.timeSlot,
+      timeCode: timeCode,
+      link: values.link, // Changed from meetingLink to link
+      note: values.adminNote, // Send admin note as note
+      paymentRequired: values.paymentMethod === "online",
+      paymentMethod: values.paymentMethod,
+      fee: values.price,
+    };
 
-    setIsModalOpen(false);
+    // Call the update API
+    updateBookings({
+      id: bookings[editingBooking].id,
+      data: updateData,
+    })
+      .unwrap()
+      .then(() => {
+        // Update the local state
+        const updatedBooking = {
+          ...bookings[editingBooking],
+          date: values.date.format("YYYY-MM-DD"),
+          // startTime: values.timeSlot,
+          // endTime: values.timeSlot,
+          time: values.timeSlot,
+          title: values.title,
+          paymentMethod: values.paymentMethod,
+          price: values.price,
+          link: values.link, // Changed from meetingLink to link
+          clientMessage: bookings[editingBooking].clientMessage, // Keep original client message
+          note: values.adminNote, // Update admin note
+        };
+
+        const updatedBookings = [...bookings];
+        updatedBookings[editingBooking] = updatedBooking;
+        setBookings(updatedBookings);
+
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        console.error("Failed to update booking:", error);
+      });
   };
 
   // Render bookings inside the calendar
@@ -225,10 +267,7 @@ const BookingCalendar = ({ bookingsData }) => {
                   <strong>{item.title}</strong>
                 </p>
                 <p>{`${item.firstName} ${item.lastName}`}</p>
-                <p>
-                  {dayjs(item.startTime, "HH:mm").format("hh:mm A")} -{" "}
-                  {dayjs(item.endTime, "HH:mm").format("hh:mm A")}
-                </p>
+                <p>{dayjs(item.time, "HH:mm").format("hh:mm A")}</p>
                 <p>Status: {item.status}</p>
               </div>
             }
@@ -251,8 +290,7 @@ const BookingCalendar = ({ bookingsData }) => {
                 }
               />
               <span className="ml-1 text-xs truncate max-w-[80%]">
-                {dayjs(item.startTime, "HH:mm").format("hh:mm A")}{" "}
-                {item.firstName}
+                {dayjs(item.time, "HH:mm").format("hh:mm A")} {item.firstName}
               </span>
             </li>
           </Tooltip>
@@ -279,7 +317,7 @@ const BookingCalendar = ({ bookingsData }) => {
         footer={null}
         width={1200}
         className="booking-modal"
-        bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
+        bodyStyle={{ maxHeight: "80vh", overflowY: "auto" }}
       >
         {editingBooking !== null && bookings[editingBooking] && (
           <Form
@@ -353,15 +391,14 @@ const BookingCalendar = ({ bookingsData }) => {
                       { required: true, message: "Please select a time slot" },
                     ]}
                   >
-                    <Select className="w-full" loading={slotsLoading}>
-                      {availableSlots.map((slot, index) => (
-                        <Option
-                          key={index}
-                          value={`${slot.startTime}-${slot.endTime}`}
-                          data-timecode={slot.timeCode}
-                        >
-                          {dayjs(slot.startTime, "HH:mm").format("hh:mm A")} -{" "}
-                          {dayjs(slot.endTime, "HH:mm").format("hh:mm A")}
+                    <Select
+                      className="w-full"
+                      loading={slotsLoading}
+                      placeholder="Select a time slot"
+                    >
+                      {availableSlots?.map((slot, index) => (
+                        <Option key={index} value={slot?.time}>
+                          {slot?.time}
                         </Option>
                       ))}
                     </Select>
@@ -387,16 +424,11 @@ const BookingCalendar = ({ bookingsData }) => {
                         <span>Meeting Link</span>
                       </div>
                     }
-                    name="meetingLink"
+                    name="link"
                     rules={[
-                      {
-                        required: meetingType === "online",
-                        message: "Please enter meeting link",
-                      },
                       {
                         type: "url",
                         message: "Please enter a valid URL",
-                        warningOnly: meetingType !== "online",
                       },
                     ]}
                   >
@@ -409,19 +441,22 @@ const BookingCalendar = ({ bookingsData }) => {
                 <div className="h-full flex flex-col">
                   <div className="mb-2">
                     <Divider orientation="left" className="my-0">
-                      Appointment Type
+                      Payment Information
                     </Divider>
                   </div>
 
                   <Form.Item
-                    name="meetingType"
+                    name="paymentMethod"
                     rules={[
-                      { required: true, message: "Please select meeting type" },
+                      {
+                        required: true,
+                        message: "Please select payment method",
+                      },
                     ]}
                     className="mb-2"
                   >
                     <Radio.Group
-                      onChange={handleMeetingTypeChange}
+                      onChange={handlePaymentMethodChange}
                       className="w-full"
                     >
                       <Space direction="vertical" className="w-full">
@@ -430,13 +465,13 @@ const BookingCalendar = ({ bookingsData }) => {
                           className="p-3 border rounded-lg w-full flex items-center"
                         >
                           <div className="flex items-center gap-2">
-                            <UserOutlined className="text-green-500" />
+                            <CreditCardOutlined className="text-green-500" />
                             <span className="font-medium">
-                              Physical Appointment
+                              Physical Payment
                             </span>
                           </div>
                           <div className="ml-6 text-gray-500 text-sm">
-                            Patient will visit the clinic in person
+                            Client will pay in person
                           </div>
                         </Radio>
                         <Radio
@@ -444,95 +479,81 @@ const BookingCalendar = ({ bookingsData }) => {
                           className="p-3 border rounded-lg w-full flex items-center"
                         >
                           <div className="flex items-center gap-2">
-                            <VideoCameraOutlined className="text-blue-500" />
-                            <span className="font-medium">
-                              Online Consultation
-                            </span>
+                            <CreditCardOutlined className="text-blue-500" />
+                            <span className="font-medium">Online Payment</span>
                           </div>
                           <div className="ml-6 text-gray-500 text-sm">
-                            Virtual appointment via video call
+                            Client will pay online
                           </div>
                         </Radio>
                       </Space>
                     </Radio.Group>
                   </Form.Item>
 
-                  {meetingType === "online" && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <Form.Item
-                        label={
-                          <div className="flex items-center gap-2">
-                            <DollarOutlined />
-                            <span>Consultation Fee</span>
-                          </div>
-                        }
-                        name="price"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter consultation fee",
-                          },
-                        ]}
-                        className="mb-2"
-                      >
-                        <InputNumber
-                          prefix="$"
-                          className="w-full"
-                          min={0}
-                          placeholder="Enter amount"
-                        />
-                      </Form.Item>
-                    </div>
-                  )}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <Form.Item
+                      label={
+                        <div className="flex items-center gap-2">
+                          <DollarOutlined />
+                          <span>Consultation Fee</span>
+                        </div>
+                      }
+                      name="price"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter consultation fee",
+                        },
+                      ]}
+                      className="mb-2"
+                    >
+                      <InputNumber
+                        prefix="$"
+                        className="w-full"
+                        min={0}
+                        placeholder="Enter amount"
+                      />
+                    </Form.Item>
+                  </div>
 
-                  {/* Client Message Section */}
-                  <div className="mt-4">
-                    <Divider orientation="left" className="my-0">
-                      Message from Client
-                    </Divider>
-                    <div className="bg-yellow-50 p-4 rounded-lg mt-2 mb-4">
-                      <p className="text-gray-700">
-                        {bookings[editingBooking].clientMessage}
-                      </p>
-                    </div>
+                  <Form.Item
+                    label="Client's Message"
+                    name="message"
+                    className="mt-4"
+                  >
+                    <Input.TextArea
+                      rows={4}
+                      placeholder="Client's message will appear here"
+                      readOnly
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </Form.Item>
 
-                    <Divider orientation="left" className="my-0">
-                      Message to Client
-                    </Divider>
-                    <div className="bg-yellow-50 p-4 rounded-lg mt-2">
-                      <Form.Item
-                        name="clientMessage"
-                        label={
-                          <div className="flex items-center gap-2">
-                            <span className="text-base font-medium">
-                              Instructions or Notes
-                            </span>
-                          </div>
-                        }
-                        tooltip="This message will be sent to the client with their appointment details"
-                      >
-                        <Input.TextArea
-                          rows={4}
-                          name="sentMessageToClient"
-                          placeholder="Enter any special instructions, preparation details, or notes for the client..."
-                          className="w-full"
-                        />
-                      </Form.Item>
-                    </div>
+                  <Form.Item
+                    label="Admin Notes/Instructions"
+                    name="adminNote"
+                    className="mt-4"
+                  >
+                    <Input.TextArea
+                      rows={4}
+                      placeholder="Add any special instructions or notes for this appointment"
+                    />
+                  </Form.Item>
+
+                  <div className="mt-auto pt-4">
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      className="w-full bg-primary hover:bg-primary/90"
+                      size="large"
+                    >
+                      Update Appointment
+                    </Button>
                   </div>
                 </div>
               </div>
             </div>
-
-            <Form.Item className="mt-4">
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="w-full h-10 bg-primary hover:bg-primary/90"
-              >
-                Update Appointment
-              </Button>
-            </Form.Item>
           </Form>
         )}
       </Modal>
