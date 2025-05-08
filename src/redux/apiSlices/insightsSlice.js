@@ -99,6 +99,28 @@ const insightsSlice = api.injectEndpoints({
       },
       invalidatesTags: ["Sections", "Insights"],
     }),
+
+    // chart
+    createInsightChart: builder.mutation({
+      query: (data) => {
+        return {
+          method: "POST",
+          url: `/dashboard/chart`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["Sections", "Insights"],
+    }),
+
+    getAllInsightChart: builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: `/dashboard/chart`,
+        };
+      },
+      providesTags: ["Insights"],
+    }),
   }),
 });
 
@@ -116,4 +138,8 @@ export const {
 
   // bars
   useCreateBarsMutation,
+
+  // chart
+  useCreateInsightChartMutation,
+  useGetAllInsightChartQuery,
 } = insightsSlice;

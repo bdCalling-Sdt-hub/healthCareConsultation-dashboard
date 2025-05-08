@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -20,8 +20,10 @@ import AddAndEditInsightModal from "../../components/ui/Insights/AddAndEditInsig
 import { FaEye } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import {
+  useCreateInsightChartMutation,
   useCreateInsightMutation,
   useDeleteInsightMutation,
+  useGetAllInsightChartQuery,
   useInsightsQuery,
 } from "../../redux/apiSlices/insightsSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
@@ -52,7 +54,21 @@ const InsightsPage = () => {
   const { data: insights, isLoading } = useInsightsQuery();
   const [deleteInsight] = useDeleteInsightMutation();
 
-  if (isLoading) {
+  const { data: insightsChartData, isLoading: isChartLoading } =
+    useGetAllInsightChartQuery();
+  const [createInsightChart] = useCreateInsightChartMutation();
+
+  // Initialize growth data from API if available
+  useEffect(() => {
+    if (insightsChartData?.data?.length > 0) {
+      const chartData = insightsChartData.data[0]?.chartData || [];
+      if (chartData.length > 0) {
+        setGrowthData(chartData);
+      }
+    }
+  }, [insightsChartData]);
+
+  if (isLoading || isChartLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spin />
@@ -97,18 +113,31 @@ const InsightsPage = () => {
     setGrowthData(newData);
   };
 
-  const handleSaveGrowthData = () => {
-    // Here you would typically save the data to your backend
-    console.log("Growth data to save:", growthData);
-    message.success("Growth data saved successfully!");
+  const handleSaveGrowthData = async () => {
+    try {
+      // Check if we're updating or creating
+      const isUpdate = insightsChartData?.data?.length > 0;
+      const chartId = isUpdate ? insightsChartData.data[0]?._id : null;
 
-    // You can add API call here to save the data
-    // For example:
-    // saveGrowthData(growthData).then(() => {
-    //   message.success("Growth data saved successfully!");
-    // }).catch(error => {
-    //   message.error("Failed to save growth data");
-    // });
+      const payload = {
+        chartData: growthData,
+      };
+
+      if (chartId) {
+        payload.id = chartId;
+      }
+
+      const response = await createInsightChart(growthData).unwrap();
+
+      if (response.success) {
+        message.success("Growth data saved successfully!");
+      } else {
+        message.error(response.message || "Failed to save growth data");
+      }
+    } catch (error) {
+      console.error("Error saving growth data:", error);
+      message.error(error?.data?.message || "Something went wrong!");
+    }
   };
 
   const columns = [

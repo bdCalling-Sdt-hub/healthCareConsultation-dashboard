@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, Input, Spin } from "antd";
+import { Button, Form, Input, Select, Spin } from "antd";
 import { BiLeftArrowAlt } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { MdOutlineAddPhotoAlternate } from "react-icons/md";
@@ -33,6 +33,7 @@ const PersonalInfo = () => {
         email: adminData?.email,
         address: adminData?.address,
         phone: adminData?.phone,
+        timezone: adminData?.timezone || "America/New_York", // Set default timezone
       });
       setImgURL(
         adminData?.profile?.startsWith("http")
@@ -66,6 +67,7 @@ const PersonalInfo = () => {
       formData.append("email", values.email);
       formData.append("address", values.address);
       formData.append("contact", values.phone);
+      formData.append("timezone", values.timezone); // Add timezone to form data
 
       if (file) {
         formData.append("image", file);
@@ -146,6 +148,29 @@ const PersonalInfo = () => {
               ]}
             >
               <Input className="py-3 bg-gray-100 rounded-xl" />
+            </Form.Item>
+
+            <Form.Item
+              label="Time Zone"
+              name="timezone"
+              rules={[{ required: true, message: "Please select a timezone" }]}
+            >
+              <Select style={{ height: 45 }} className=" rounded-xl">
+                {[
+                  "America/New_York",
+                  "America/Chicago",
+                  "America/Denver",
+                  "America/Los_Angeles",
+                  "America/Anchorage",
+                  "America/Honolulu",
+                  "America/Phoenix",
+                  "America/Indiana/Indianapolis",
+                ].map((zone) => (
+                  <Select.Option key={zone} value={zone}>
+                    {zone}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
 
             <Form.Item>
