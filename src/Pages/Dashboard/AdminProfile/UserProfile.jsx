@@ -212,7 +212,7 @@ const PersonalInfo = () => {
               </div>
             </label>
             <div className="text-center">
-              <h1>Profile</h1>
+              <h1 className="text-xl font-bold">{adminData?.name}</h1>
               <h1 className="text-xl">Admin</h1>
             </div>
           </div>
