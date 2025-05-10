@@ -117,7 +117,7 @@ const Users = () => {
             <img
               src={getImageUrl(selectedUser.profile) || randomImg}
               alt={selectedUser.name}
-              className="w-44 h-40 rounded-2xl"
+              className="w-44 h-40 object-contain rounded-2xl"
             />
             <h2 className="text-lg font-semibold">Name: {selectedUser.name}</h2>
             <p className="text-gray-600">

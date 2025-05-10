@@ -86,6 +86,7 @@ export const api = createApi({
     "slots",
     "ourWay",
     "Insights",
+    "notification",
   ],
   endpoints: () => ({}),
 });

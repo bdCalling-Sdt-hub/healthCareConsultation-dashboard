@@ -125,7 +125,7 @@ const Bookings = () => {
                   : `${imageUrl}/${selectedBooking?.service?.image}`
               }
               alt="Profile"
-              className="w-40 h-40 rounded-2xl mb-4"
+              className="w-40 h-40 rounded-2xl object-contain mb-4"
             />
             <h3 className="text-2xl font-bold my-5">
               {selectedBooking.client}
@@ -150,7 +150,7 @@ const Bookings = () => {
               <strong>Date:</strong>{" "}
               {moment(selectedBooking.scheduledAt).format("DD MMM YYYY")}
             </p>
-            <div
+            {/* <div
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -167,7 +167,7 @@ const Bookings = () => {
               <Button type="default" danger>
                 Cancel
               </Button>
-            </div>
+            </div> */}
           </div>
         )}
       </Modal>

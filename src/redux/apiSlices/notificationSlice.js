@@ -14,11 +14,12 @@ const notificationSlice = api.injectEndpoints({
           },
         };
       },
+      providesTags: ["notification"],
     }),
     read: builder.mutation({
-      query: () => {
+      query: (id) => {
         return {
-          url: `/notifications`,
+          url: `/notification/${id}`,
           method: "GET",
           headers: {
             Authorization: `Bearer ${JSON.parse(
@@ -27,6 +28,7 @@ const notificationSlice = api.injectEndpoints({
           },
         };
       },
+      invalidatesTags: ["notification"],
     }),
   }),
 });

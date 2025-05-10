@@ -30,6 +30,7 @@ import {
   useGetSlotsByDateQuery,
   useUpdateBookingsMutation,
 } from "../../../redux/apiSlices/bookingSlice";
+import { useFetchAdminProfileQuery } from "../../../redux/apiSlices/authSlice";
 
 const { Option } = Select;
 const { Text, Title } = Typography;
@@ -37,24 +38,26 @@ const { Text, Title } = Typography;
 const BookingCalendar = ({ bookingsData }) => {
   console.log("bookingData", bookingsData);
 
-  // Convert timeCode to time format
-  const getTimeFromCode = (timeCode) => {
-    const hours = Math.floor(timeCode / 100);
-    const minutes = timeCode % 100;
-    return `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
   // State to hold selected date and timezone for API query
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTimeZone, setSelectedTimeZone] = useState("America/New_York");
 
+  const { data: userData, isLoading: isAdminLoading } =
+    useFetchAdminProfileQuery();
   // Use the query with parameters
   const { data: slotsData, isLoading: slotsLoading } = useGetSlotsByDateQuery(
-    { date: selectedDate, timeZone: selectedTimeZone }
+    {
+      date: selectedDate,
+      timeZone: userData?.data?.timezone || "America/New_York",
+    }
     // { skip: !selectedDate }
   );
+
+  useEffect(() => {
+    if (userData?.data) {
+      setSelectedTimeZone(userData?.data?.timezone || "America/New_York");
+    }
+  }, [userData]);
 
   const [updateBookings] = useUpdateBookingsMutation();
 
@@ -199,20 +202,34 @@ const BookingCalendar = ({ bookingsData }) => {
     const selectedSlot = availableSlots.find(
       (slot) => slot.time === values.timeSlot
     );
-    const timeCode = selectedSlot ? selectedSlot.timeCode : null;
 
-    if (!timeCode) {
-      console.error("Could not find timeCode for the selected time slot");
-      return;
+    // If no timeCode is found, use the original timeCode or a default value
+    let timeCode = null;
+    if (selectedSlot) {
+      timeCode = selectedSlot.timeCode;
+    } else if (editingBooking !== null && bookings[editingBooking]) {
+      // Use the original booking's timeCode if available
+      const originalBooking = bookingsData.find(
+        (booking) => booking._id === bookings[editingBooking].id
+      );
+      timeCode = originalBooking?.timeCode || 900; // Default to 900 (9:00 AM) if not found
+    } else {
+      // Default timeCode if nothing else is available
+      timeCode = 900; // Default to 900 (9:00 AM)
     }
+
+    // Format the time in 12-hour format with AM/PM
+    const formattedTime = values.timeSlot
+      ? dayjs(values.timeSlot, "HH:mm").format("hh:mm A")
+      : bookings[editingBooking].time;
 
     // Create the updated booking data according to the required format
     const updateData = {
       date: values.date.format("YYYY-MM-DD"),
-      time: values.timeSlot,
+      time: formattedTime, // Use the formatted time in 12-hour format
       timeCode: timeCode,
-      link: values.link, // Changed from meetingLink to link
-      note: values.adminNote, // Send admin note as note
+      link: values.link,
+      note: values.adminNote,
       paymentRequired: values.paymentMethod === "online",
       paymentMethod: values.paymentMethod,
       fee: values.price,
@@ -229,15 +246,13 @@ const BookingCalendar = ({ bookingsData }) => {
         const updatedBooking = {
           ...bookings[editingBooking],
           date: values.date.format("YYYY-MM-DD"),
-          // startTime: values.timeSlot,
-          // endTime: values.timeSlot,
-          time: values.timeSlot,
+          time: formattedTime, // Use the formatted time here too
           title: values.title,
           paymentMethod: values.paymentMethod,
           price: values.price,
-          link: values.link, // Changed from meetingLink to link
-          clientMessage: bookings[editingBooking].clientMessage, // Keep original client message
-          note: values.adminNote, // Update admin note
+          link: values.link,
+          clientMessage: bookings[editingBooking].clientMessage,
+          note: values.adminNote,
         };
 
         const updatedBookings = [...bookings];

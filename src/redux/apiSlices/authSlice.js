@@ -116,6 +116,7 @@ const authSlice = api.injectEndpoints({
           url: "/user/profile",
         };
       },
+      providesTags: ["AdminData"],
     }),
 
     updateAdminInfo: builder.mutation({

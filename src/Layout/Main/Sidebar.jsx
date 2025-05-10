@@ -55,11 +55,11 @@ const Sidebar = () => {
       icon: <FaCalendarAlt size={24} />,
       label: <Link to="/bookings">Bookings</Link>,
     },
-    {
-      key: "/transactions",
-      icon: <AiOutlineTransaction size={24} />,
-      label: <Link to="/transactions">Transactions</Link>,
-    },
+    // {
+    //   key: "/transactions",
+    //   icon: <AiOutlineTransaction size={24} />,
+    //   label: <Link to="/transactions">Transactions</Link>,
+    // },
     {
       key: "/services",
       icon: <MdMedicalServices size={24} />,

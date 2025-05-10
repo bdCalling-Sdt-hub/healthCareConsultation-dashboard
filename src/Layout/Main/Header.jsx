@@ -2,15 +2,18 @@ import React from "react";
 
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
-import { Badge } from "antd";
+import { Badge, Spin } from "antd";
 import logo from "../../assets/randomProfile2.jpg";
 import { useFetchAdminProfileQuery } from "../../redux/apiSlices/authSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
+import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
 
 const Header = () => {
   const { data: userData, isLoading } = useFetchAdminProfileQuery();
+  const { data: notifications, isLoading: isNotificationLoading } =
+    useNotificationQuery(undefined);
 
-  if (isLoading) {
+  if (isLoading || isNotificationLoading) {
     return (
       <div className="flex justify-center items-center my-20 text-lg text-secondary">
         Loading...
@@ -18,10 +21,14 @@ const Header = () => {
     );
   }
 
+  const NotificationCount = notifications?.data?.filter(
+    (noti) => noti?.isRead === false
+  ).length;
+
   return (
     <div className="flex items-center gap-5 justify-end">
       <Link to="/notification" className="h-fit mt-[10px]">
-        <Badge count={5}>
+        <Badge count={NotificationCount}>
           <FaRegBell color="#4E4E4E" size={24} />
         </Badge>
       </Link>

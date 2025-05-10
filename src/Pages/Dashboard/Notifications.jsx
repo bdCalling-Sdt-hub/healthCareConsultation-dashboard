@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { ConfigProvider, Pagination } from "antd";
 import Title from "../../components/common/Title";
-import { useNotificationQuery } from "../../redux/apiSlices/notificationSlice";
+import {
+  useNotificationQuery,
+  useReadMutation,
+} from "../../redux/apiSlices/notificationSlice";
 import rentMeLogo from "../../assets/navLogo.png";
+import { getImageUrl } from "../../utils/getImageUrl";
+import { useNavigate } from "react-router-dom";
 
 const notificationsData = [
   {
@@ -74,8 +79,10 @@ const notificationsData = [
 const Notifications = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-  const isLoading = false;
-  // const { data: notifications, isLoading } = useNotificationQuery();
+  const navigate = useNavigate();
+
+  const { data: notifications, isLoading } = useNotificationQuery();
+  const [markAsRead] = useReadMutation();
 
   if (isLoading) {
     return (
@@ -84,30 +91,70 @@ const Notifications = () => {
       </div>
     );
   }
-  const notifications = [];
-  const notificationData = notifications.data;
 
-  console.log(notificationData);
-
-  const paginatedData = notificationsData.slice(
-    (page - 1) * pageSize,
-    page * pageSize
+  // Sort notifications by creation date (newest first)
+  const notificationData = [...notifications.data].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
+
+  // const paginatedData = notificationsData.slice(
+  //   (page - 1) * pageSize,
+  //   page * pageSize
+  // );
+
+  const handleReadNotification = async (id) => {
+    try {
+      await markAsRead(id);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const handleReadAll = async () => {
+    try {
+      // Since we don't have a dedicated API for marking all as read,
+      // we'll mark each notification as read one by one
+      const unreadNotifications = notificationData.filter(
+        (notification) => !notification.isRead
+      );
+      for (const notification of unreadNotifications) {
+        await markAsRead(notification._id);
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    // Mark as read if not already read
+    if (!notification.isRead) {
+      await handleReadNotification(notification._id);
+    }
+
+    // Navigate to booking calendar page
+    navigate("/bookings");
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <Title className="text-[22px]">All Notifications</Title>
-        <button className="bg-[#15405D] text-white h-10 px-4 rounded-md">
+        <button
+          className="bg-[#15405D] text-white h-10 px-4 rounded-md"
+          onClick={handleReadAll}
+        >
           Read All
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-5 bg-white p-4 rounded-lg">
-        {paginatedData.map((notification) => (
+        {notificationData?.map((notification) => (
           <div
-            key={notification.id}
-            className="border-b-[1px] pb-2 border-[#d9d9d9] flex items-center gap-3"
+            key={notification._id}
+            className={`border-b-[1px] p-2 cursor-pointer rounded-xl border-[#d9d9d9] flex items-center gap-3 ${
+              notification?.isRead ? "" : "bg-gray-200"
+            }`}
+            onClick={() => handleNotificationClick(notification)}
           >
             <img
               style={{
@@ -116,16 +163,35 @@ const Notifications = () => {
                 borderRadius: "100%",
                 border: "2px solid gray",
               }}
-              src={notification.avatar}
-              alt={`${notification.sender} avatar`}
+              src={getImageUrl(notification?.sender?.profile)}
+              className="object-cover"
+              alt={`${notification?.sender?.name} avatar`}
             />
             <div>
-              <p>
-                <span className="font-bold">{notification.sender}</span>:{" "}
-                {notification.message}
+              <p className={`${notification?.isRead ? "" : "font-semibold"}`}>
+                <span>{notification?.sender?.name}</span> <br />
+                {notification?.body}
               </p>
               <p style={{ color: "gray", marginTop: "4px" }}>
-                {notification.timestamp}
+                {(() => {
+                  const createdAt = new Date(notification?.createdAt);
+                  const now = new Date();
+                  const diffInMinutes = Math.floor(
+                    (now - createdAt) / (1000 * 60)
+                  );
+
+                  if (diffInMinutes < 1) {
+                    return "<1min ago";
+                  } else if (diffInMinutes < 60) {
+                    return `${diffInMinutes}m ago`;
+                  } else if (diffInMinutes < 1440) {
+                    const hours = Math.floor(diffInMinutes / 60);
+                    return `${hours}h ago`;
+                  } else {
+                    const days = Math.floor(diffInMinutes / 1440);
+                    return `${days}d ago`;
+                  }
+                })()}
               </p>
             </div>
           </div>
