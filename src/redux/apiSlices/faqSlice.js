@@ -45,6 +45,28 @@ const faqSlice = api.injectEndpoints({
       },
       invalidatesTags: ["Faqs"],
     }),
+
+    //about us
+    allAboutUs: builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: "/about",
+        };
+      },
+      providesTags: ["AboutUs"],
+    }),
+
+    updateAboutUs: builder.mutation({
+      query: ({ data }) => {
+        return {
+          method: "POST",
+          url: `/about`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["AboutUs"],
+    }),
   }),
 });
 
@@ -53,4 +75,8 @@ export const {
   useAddFaqMutation,
   useUpdateFaqMutation,
   useDeleteFaqMutation,
+
+  //about us
+  useAllAboutUsQuery,
+  useUpdateAboutUsMutation,
 } = faqSlice;

@@ -113,6 +113,14 @@ const Sidebar = () => {
           ),
         },
         {
+          key: "/about-us",
+          label: (
+            <Link to="/about-us" className="text-white hover:text-white">
+              About Us
+            </Link>
+          ),
+        },
+        {
           key: "/terms-and-condition",
           label: (
             <Link

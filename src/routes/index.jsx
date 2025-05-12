@@ -24,6 +24,7 @@ import Faq from "../Pages/Dashboard/Faq";
 import PrivateRoute from "./PrivateRoute";
 import OurWay from "../Pages/Dashboard/OurWay";
 import Review from "../Pages/Dashboard/review";
+import AboutUs from "../Pages/Dashboard/AboutUs";
 
 const router = createBrowserRouter([
   {
@@ -82,6 +83,10 @@ const router = createBrowserRouter([
       {
         path: "/reviews",
         element: <Review />,
+      },
+      {
+        path: "/about-us",
+        element: <AboutUs />,
       },
       {
         path: "/privacy-policy",
