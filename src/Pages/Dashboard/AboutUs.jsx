@@ -11,8 +11,9 @@ import {
   Card,
   Collapse,
   notification,
+  Spin,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   EditOutlined,
   EyeOutlined,
@@ -20,69 +21,90 @@ import {
   DeleteOutlined,
   MinusCircleOutlined,
 } from "@ant-design/icons";
+import {
+  useAllAboutUsQuery,
+  useUpdateAboutUsMutation,
+} from "../../redux/apiSlices/faqSlice";
+import { getImageUrl } from "../../utils/getImageUrl";
+import toast from "react-hot-toast";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Panel } = Collapse;
 
-const aboutData = [
-  {
-    id: 1,
-    title: "Our Mission",
-    images: [
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-    ],
-    description: [
-      {
-        title: "",
-        body: "Hukka Hua",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Our Vision",
-    images: [
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-    ],
-    description: [
-      {
-        title: "",
-        body: "Hukka Hua",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Our Values",
-    images: [
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-      "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
-    ],
-    description: [
-      {
-        title: "hello",
-        body: "Hukka Hua",
-      },
-      {
-        title: "hello",
-        body: "Hukka Hua",
-      },
-      {
-        title: "hello",
-        body: "Hukka Hua",
-      },
-    ],
-  },
-];
+// const aboutData = [
+//   {
+//     id: 1,
+//     title: "Our Mission",
+//     images: [
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//     ],
+//     description: [
+//       {
+//         title: "",
+//         body: "Hukka Hua",
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     title: "Our Vision",
+//     images: [
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//     ],
+//     description: [
+//       {
+//         title: "",
+//         body: "Hukka Hua",
+//       },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     title: "Our Values",
+//     images: [
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//       "https://cdn.pixabay.com/photo/2017/06/14/21/11/random-2403426_640.png",
+//     ],
+//     description: [
+//       {
+//         title: "hello",
+//         body: "Hukka Hua",
+//       },
+//       {
+//         title: "hello",
+//         body: "Hukka Hua",
+//       },
+//       {
+//         title: "hello",
+//         body: "Hukka Hua",
+//       },
+//     ],
+//   },
+// ];
 
 const AboutUs = () => {
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [form] = Form.useForm();
+  const [fileList, setFileList] = useState([]);
+
+  const { data: aboutsData, isLoading } = useAllAboutUsQuery();
+  const [updateAbout, { isLoading: isUpdating }] = useUpdateAboutUsMutation();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin />
+      </div>
+    );
+  }
+
+  const aboutData = aboutsData?.data;
+  // console.log(aboutData);
 
   // Define columns for the Ant Design table
   const columns = [
@@ -93,9 +115,9 @@ const AboutUs = () => {
     },
     {
       title: "Description",
-      dataIndex: "description",
-      key: "description",
-      render: (descriptions) => descriptions[0]?.body || "No description",
+      dataIndex: "descriptions",
+      key: "descriptions",
+      render: (descriptions) => descriptions?.[0]?.body || "N/A",
     },
     {
       title: "Actions",
@@ -132,42 +154,86 @@ const AboutUs = () => {
     // Set form values with the description array
     form.setFieldsValue({
       title: record.title,
-      descriptions: record.description.map((desc) => ({
-        heading: desc.title || "", // Map title to heading for clarity
+      type: record.type,
+      descriptions: record?.descriptions?.map((desc) => ({
+        heading: desc.heading || "",
         body: desc.body || "",
       })),
     });
+
+    // Set file list for the Upload component with proper image URLs
+    if (record.images && record.images.length > 0) {
+      const newFileList = record.images.map((img, index) => ({
+        uid: `-${index}`,
+        name: `image-${index}`,
+        status: "done",
+        url: getImageUrl(img), // Use getImageUrl to properly format the image URL
+        thumbUrl: getImageUrl(img), // Also set thumbUrl for preview
+      }));
+      setFileList(newFileList);
+    } else {
+      setFileList([]);
+    }
 
     setEditModalVisible(true);
   };
 
   const handleEditSubmit = () => {
-    form.validateFields().then((values) => {
-      // Here you would typically update your data
-      console.log("Updated values:", values);
+    form
+      .validateFields()
+      .then((values) => {
+        // Create a new FormData object
+        const formData = new FormData();
 
-      // Example of how you might update the data
-      // const updatedData = aboutData.map(item => {
-      //   if (item.id === selectedRecord.id) {
-      //     return {
-      //       ...item,
-      //       description: values.descriptions.map(desc => ({
-      //         title: desc.heading,
-      //         body: desc.body
-      //       }))
-      //     };
-      //   }
-      //   return item;
-      // });
+        // Create the data object with the structure you need
+        const data = {
+          title: values.title,
+          type: values.type,
+          descriptions: values.descriptions,
+        };
 
-      notification.success({
-        message: "Updated Successfully",
-        description: `${selectedRecord.title} has been updated.`,
+        console.log("asdvsvdsdfv", data);
+        // Append data as a JSON string
+        formData.append("data", JSON.stringify(data));
+
+        // Append new images as files
+        fileList.forEach((file) => {
+          if (file.originFileObj) {
+            formData.append("image", file.originFileObj);
+          }
+        });
+
+        // For existing images, extract the path from the URL
+        const existingImages = fileList
+          .filter((file) => !file.originFileObj && file.url)
+          .map((file) => {
+            // Extract the path portion from the full URL
+            const urlPath = file.url.replace(import.meta.env.VITE_API_URL, "");
+            return urlPath;
+          });
+
+        // Log what we're sending to help with debugging
+        console.log("Submitting data:", data);
+        console.log("Existing images:", existingImages);
+
+        // Call the update mutation with FormData
+        updateAbout({ data: formData })
+          .unwrap()
+          .then(() => {
+            toast.success("About section updated successfully");
+            setEditModalVisible(false);
+          })
+          .catch((error) => {
+            toast.error(error.message || "Failed to update about section");
+          });
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
       });
+  };
 
-      // Close the modal
-      setEditModalVisible(false);
-    });
+  const handleUploadChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
   };
 
   return (
@@ -178,7 +244,7 @@ const AboutUs = () => {
       <Table
         dataSource={aboutData}
         columns={columns}
-        rowKey="id"
+        rowKey="_id"
         pagination={false}
         bordered
       />
@@ -200,10 +266,10 @@ const AboutUs = () => {
             <Title level={4}>{selectedRecord.title}</Title>
             <div className="my-4">
               <Space>
-                {selectedRecord.images.map((img, index) => (
+                {selectedRecord?.images?.map((img, index) => (
                   <img
                     key={index}
-                    src={img}
+                    src={getImageUrl(img)}
                     alt={`Image ${index + 1}`}
                     style={{ width: 150, height: 150, objectFit: "cover" }}
                   />
@@ -212,13 +278,13 @@ const AboutUs = () => {
             </div>
             <div className="mt-4">
               <Collapse defaultActiveKey={["0"]} ghost>
-                {selectedRecord.description.map((desc, index) => (
-                  <Panel
-                    header={desc.title ? desc.title : `Section ${index + 1}`}
-                    key={index}
-                  >
-                    <p>{desc.body}</p>
-                  </Panel>
+                {selectedRecord?.descriptions?.map((desc, index) => (
+                  <div>
+                    {desc?.heading && (
+                      <h1 className="font-semibold">{desc?.heading}</h1>
+                    )}
+                    <p>{desc?.body}</p>
+                  </div>
                 ))}
               </Collapse>
             </div>
@@ -238,6 +304,13 @@ const AboutUs = () => {
           <Form.Item
             name="title"
             label="Title"
+            rules={[{ required: true, message: "Please enter a title" }]}
+          >
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item
+            name="type"
+            label="Type"
             rules={[{ required: true, message: "Please enter a title" }]}
           >
             <Input readOnly />
@@ -296,17 +369,16 @@ const AboutUs = () => {
           <Form.Item name="images" label="Images">
             <Upload
               listType="picture-card"
-              fileList={selectedRecord?.images.map((img, index) => ({
-                uid: `-${index}`,
-                name: `image-${index}`,
-                status: "done",
-                url: img,
-              }))}
+              fileList={fileList}
+              onChange={handleUploadChange}
+              beforeUpload={() => false} // Prevent auto upload
             >
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </div>
+              {fileList.length >= 2 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
             </Upload>
           </Form.Item>
         </Form>

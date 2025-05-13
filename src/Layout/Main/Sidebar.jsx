@@ -76,6 +76,11 @@ const Sidebar = () => {
       label: <Link to="/our-way">Our Way</Link>,
     },
     {
+      key: "/challenges",
+      icon: <AiOutlineGateway size={24} />,
+      label: <Link to="/challenges">Challenges</Link>,
+    },
+    {
       key: "/users",
       icon: <TbUserScreen size={24} />,
       label: <Link to="/users">Users</Link>,

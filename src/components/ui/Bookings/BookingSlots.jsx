@@ -5,6 +5,7 @@ import {
   useGetSlotsQuery,
   useManageSlotsMutation,
 } from "../../../redux/apiSlices/bookingSlice";
+import { useFetchAdminProfileQuery } from "../../../redux/apiSlices/authSlice";
 
 const { Option } = Select;
 
@@ -15,18 +16,33 @@ const BookingSlots = () => {
   const [schedule, setSchedule] = useState(null);
 
   const { data: scheduleData, isLoading } = useGetSlotsQuery();
+  const { data: userData, isLoading: userDataLoading } =
+    useFetchAdminProfileQuery();
   const [updateSlots, { isLoading: isUpdating }] = useManageSlotsMutation();
 
-  // Initialize schedule from API data
+  // Initialize schedule from API data or with default days if no data
   useEffect(() => {
-    if (scheduleData?.data) {
+    if (scheduleData?.data && scheduleData.data.length > 0) {
       setSchedule({
         schedule: scheduleData.data,
+      });
+    } else {
+      // Initialize with default days if no data from API
+      setSchedule({
+        schedule: [
+          { day: "sunday", times: [] },
+          { day: "monday", times: [] },
+          { day: "tuesday", times: [] },
+          { day: "wednesday", times: [] },
+          { day: "thursday", times: [] },
+          { day: "friday", times: [] },
+          { day: "saturday", times: [] },
+        ],
       });
     }
   }, [scheduleData]);
 
-  if (isLoading || !schedule) {
+  if (isLoading || !schedule || userDataLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spin />
@@ -91,25 +107,29 @@ const BookingSlots = () => {
     }));
   };
 
+  // console.log("safgbdsfb", userData?.data?.timezone);
+
   // Function to save schedule to backend
   const handleSaveSchedule = async () => {
     try {
       // Create a properly formatted schedule object that matches the expected format
       const formattedSchedule = {
         timeZone: "America/New_York", // Add the timeZone property
-        schedule: schedule.schedule.map(day => ({
+        schedule: schedule.schedule.map((day) => ({
           day: day.day,
-          times: day.times.map(slot => slot.time) // Just extract the time strings
-        }))
+          times: day.times.map((slot) => slot.time), // Just extract the time strings
+        })),
       };
-      
+
       console.log("Sending data:", JSON.stringify(formattedSchedule, null, 2));
-      
+
       await updateSlots(formattedSchedule).unwrap();
       message.success("Schedule updated successfully");
     } catch (error) {
       console.error("Failed to update schedule:", error);
-      message.error("Failed to update schedule: " + (error.message || "Unknown error"));
+      message.error(
+        "Failed to update schedule: " + (error.message || "Unknown error")
+      );
     }
   };
 

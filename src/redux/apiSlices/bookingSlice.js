@@ -36,7 +36,7 @@ const bookingSlice = api.injectEndpoints({
       query: ({ date, timeZone }) => {
         return {
           method: "GET",
-          url: `/user/schedule/${date}?timezone=${timeZone}`,
+          url: `/user/schedule/${date}?timeZone=${timeZone}`,
         };
       },
       providesTags: ["slots"],

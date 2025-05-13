@@ -25,6 +25,7 @@ import PrivateRoute from "./PrivateRoute";
 import OurWay from "../Pages/Dashboard/OurWay";
 import Review from "../Pages/Dashboard/review";
 import AboutUs from "../Pages/Dashboard/AboutUs";
+import Challenges from "../Pages/Dashboard/Challenges";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: "/our-way",
         element: <OurWay />,
+      },
+      {
+        path: "/challenges",
+        element: <Challenges />,
       },
       {
         path: "/insights/:id",
