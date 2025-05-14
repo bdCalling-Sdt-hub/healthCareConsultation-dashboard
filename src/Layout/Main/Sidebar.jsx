@@ -23,6 +23,7 @@ import { DiGoogleAnalytics } from "react-icons/di";
 import { BiSolidCategoryAlt } from "react-icons/bi";
 import { FaCalendar, FaMoneyBillTransfer, FaScissors } from "react-icons/fa6";
 import { FaBorderStyle, FaCalendarAlt } from "react-icons/fa";
+import { SiVictoriametrics } from "react-icons/si";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -77,7 +78,7 @@ const Sidebar = () => {
     },
     {
       key: "/challenges",
-      icon: <AiOutlineGateway size={24} />,
+      icon: <SiVictoriametrics size={24} />,
       label: <Link to="/challenges">Challenges</Link>,
     },
     {

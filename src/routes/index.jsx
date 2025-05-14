@@ -13,7 +13,6 @@ import Notifications from "../Pages/Dashboard/Notifications";
 import Transactions from "../Pages/Dashboard/Transactions";
 import UserProfile from "../Pages/Dashboard/AdminProfile/UserProfile";
 import TermsAndCondition from "../Pages/Dashboard/TermsAndCondition";
-
 import Insights from "../Pages/Dashboard/Insights";
 import Booking from "../Pages/Dashboard/Booking";
 import Services from "../Pages/Dashboard/Services";
@@ -21,9 +20,9 @@ import Service from "../Pages/Dashboard/Service";
 import SingleInsight from "../Pages/Dashboard/SingleInsight";
 import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy";
 import Faq from "../Pages/Dashboard/Faq";
-import PrivateRoute from "./PrivateRoute";
 import OurWay from "../Pages/Dashboard/OurWay";
-import Review from "../Pages/Dashboard/review";
+import PrivateRoute from "./PrivateRoute";
+import Review from "../Pages/Dashboard/Review";
 import AboutUs from "../Pages/Dashboard/AboutUs";
 import Challenges from "../Pages/Dashboard/Challenges";
 
