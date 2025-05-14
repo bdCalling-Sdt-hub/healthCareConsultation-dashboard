@@ -4,12 +4,12 @@ import { EyeOutlined, EditOutlined } from "@ant-design/icons";
 import AddAndEditModal from "../../components/ui/Services/AddAndEditModal";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "../../utils/getImageUrl";
+import toast from "react-hot-toast";
 import {
   useDeleteServiceMutation,
   useGetAllServicesQuery,
 } from "../../redux/apiSlices/ServiceSlice";
-import { getImageUrl } from "../../utils/getImageUrl";
-import toast from "react-hot-toast";
 
 const Services = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
