@@ -9,6 +9,7 @@ const challengeSlice = api.injectEndpoints({
           url: "/challenges",
         };
       },
+      providesTags: ["challenges"],
     }),
 
     createChallenge: builder.mutation({
@@ -16,12 +17,38 @@ const challengeSlice = api.injectEndpoints({
         return {
           method: "POST",
           url: "/challenges",
-          data: data,
+          body: data,
         };
       },
+      invalidatesTags: ["challenges"],
+    }),
+
+    updateChallenge: builder.mutation({
+      query: ({ id, data }) => {
+        return {
+          method: "PATCH",
+          url: `/challenges/${id}`,
+          body: data,
+        };
+      },
+      invalidatesTags: ["challenges"],
+    }),
+
+    deleteChallenge: builder.mutation({
+      query: (id) => {
+        return {
+          method: "DELETE",
+          url: `/challenges/${id}`,
+        };
+      },
+      invalidatesTags: ["challenges"],
     }),
   }),
 });
 
-export const { useGetChallengesQuery, useCreateChallengeMutation } =
-  challengeSlice;
+export const {
+  useGetChallengesQuery,
+  useCreateChallengeMutation,
+  useUpdateChallengeMutation,
+  useDeleteChallengeMutation,
+} = challengeSlice;
