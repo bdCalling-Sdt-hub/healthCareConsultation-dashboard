@@ -14,7 +14,7 @@ import {
   useGetAllTabsQuery,
   useGetSingleServiceQuery,
   useUpdateTabsMutation,
-} from "../../redux/apiSlices/ServiceSlice";
+} from "../../redux/apiSlices/serviceSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
 import { MdEditSquare } from "react-icons/md";
 
