@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import {
   useDeleteServiceMutation,
   useGetAllServicesQuery,
-} from "../../redux/apiSlices/ServiceSlice";
+} from "../../redux/apiSlices/serviceSlice";
 
 const Services = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
