@@ -12,17 +12,14 @@ import {
   Carousel,
   Card,
 } from "antd";
-import {
-  EyeOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import { FaEdit, FaEye, FaTrash } from "react-icons/fa";
 import {
   useDeleteChallengeMutation,
   useGetChallengesQuery,
 } from "../../redux/apiSlices/challengeSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
-import { useGetAllServicesQuery } from "../../redux/apiSlices/ServiceSlice";
+import { useGetAllServicesQuery } from "../../redux/apiSlices/serviceSlice";
 import toast from "react-hot-toast";
 import ChallengeModal from "../../components/ui/challenge/ChallengeModal";
 

@@ -4,7 +4,7 @@ import { UploadOutlined, PictureOutlined } from "@ant-design/icons";
 import {
   useCreateServiceMutation,
   useEditServiceMutation,
-} from "../../../redux/apiSlices/ServiceSlice";
+} from "../../../redux/apiSlices/serviceSlice";
 import toast from "react-hot-toast";
 import { getImageUrl } from "../../../utils/getImageUrl";
 
@@ -47,7 +47,7 @@ const AddAndEditModal = ({ visible, onClose, service }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -101,18 +101,22 @@ const AddAndEditModal = ({ visible, onClose, service }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Service Image
           </label>
-          <Upload 
+          <Upload
             beforeUpload={(file) => {
               setImage(file);
               return false;
-            }} 
+            }}
             showUploadList={false}
           >
             <div className="border-2 border-dashed border-gray-300 p-6 flex flex-col items-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300 rounded-lg">
               {image ? (
                 <div className="flex flex-col items-center">
                   <img
-                    src={typeof image === "string" ? image : URL.createObjectURL(image)}
+                    src={
+                      typeof image === "string"
+                        ? image
+                        : URL.createObjectURL(image)
+                    }
                     alt="Preview"
                     className="w-32 h-32 object-cover rounded-lg mb-2"
                   />
