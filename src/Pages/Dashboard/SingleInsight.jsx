@@ -7,6 +7,7 @@ import {
   Collapse,
   Form,
   message,
+  Spin,
 } from "antd";
 import { FaPlus } from "react-icons/fa";
 import { useState } from "react";
@@ -49,7 +50,11 @@ const SingleInsight = () => {
   const [assignBars] = useCreateBarsMutation();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spin />
+      </div>
+    );
   }
 
   const sections = getInsightData?.data;

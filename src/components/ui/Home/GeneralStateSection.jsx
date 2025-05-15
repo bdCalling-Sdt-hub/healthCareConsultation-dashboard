@@ -3,6 +3,7 @@ import salongoLogo from "../../../assets/salon-go-logo.png";
 import { FaThList } from "react-icons/fa";
 import { GrMoney } from "react-icons/gr";
 import { useGeneralStatsQuery } from "../../../redux/apiSlices/dashboardSlice";
+import { Spin } from "antd";
 
 const GeneralStateSection = () => {
   // Replace dummy data with RTK Query
@@ -11,7 +12,7 @@ const GeneralStateSection = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={salongoLogo} alt="" />
+        <Spin />
       </div>
     );
   }

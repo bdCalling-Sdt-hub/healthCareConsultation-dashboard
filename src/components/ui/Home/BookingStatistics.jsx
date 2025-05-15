@@ -2,6 +2,7 @@ import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useBookingStatisticsQuery } from "../../../redux/apiSlices/dashboardSlice";
 import salongoLogo from "../../../assets/salon-go-logo.png";
+import { Spin } from "antd";
 
 const COLORS = ["#15405d", "#336484", "#1b2f3d"];
 
@@ -37,8 +38,8 @@ const BookingStatistics = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-40">
-        <img src={salongoLogo} alt="" className="w-20" />
+      <div className="flex min-h-screen items-center justify-center">
+        <Spin />
       </div>
     );
   }

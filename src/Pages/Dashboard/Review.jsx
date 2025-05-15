@@ -23,6 +23,7 @@ import {
   useUpdateReviewMutation,
 } from "../../redux/apiSlices/reviewSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
+import toast from "react-hot-toast";
 
 const Review = () => {
   const [form] = Form.useForm();
@@ -92,19 +93,23 @@ const Review = () => {
       }
 
       if (editingReview) {
-        await updateReview({
+        const res = await updateReview({
           id: editingReview._id,
           data: formData,
         }).unwrap();
-        message.success("Review updated successfully");
+        if (res?.success) {
+          toast.success(res?.message || "Review updated successfully");
+        }
       } else {
-        await addReview(formData).unwrap();
-        message.success("Review added successfully");
+        const res = await addReview(formData).unwrap();
+        if (res?.success) {
+          toast.success(res?.message || "Review added successfully");
+        }
       }
       handleCancel();
     } catch (error) {
-      message.error(
-        "Failed to save review: " + (error.message || "Unknown error")
+      toast.error(
+        "Failed to add/update review: " + (error?.message || "Unknown error")
       );
     }
   };

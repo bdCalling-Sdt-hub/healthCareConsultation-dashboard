@@ -32,7 +32,7 @@ const RevenueStatistics = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-40">
+      <div className="flex min-h-screen items-center justify-center">
         <Spin />
       </div>
     );

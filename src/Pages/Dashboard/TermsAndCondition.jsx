@@ -7,6 +7,7 @@ import {
 } from "../../redux/apiSlices/termsAndConditionSlice";
 import toast from "react-hot-toast";
 import rentMeLogo from "../../assets/navLogo.png";
+import { Spin } from "antd";
 
 const TermsAndCondition = () => {
   const editor = useRef(null);
@@ -29,7 +30,7 @@ const TermsAndCondition = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={rentMeLogo} alt="" />
+        <Spin />
       </div>
     );
   }

@@ -20,7 +20,7 @@ const Services = () => {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center h-screen justify-center">
         <Spin />
       </div>
     );

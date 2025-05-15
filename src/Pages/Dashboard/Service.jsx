@@ -28,6 +28,7 @@ const Service = () => {
   const [form] = Form.useForm();
   const [image, setImage] = useState(null);
   const [videos, setVideos] = useState([null, null]);
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: service, isLoading } = useGetSingleServiceQuery(id);
   const { data: getTabs, isLoading: isTabLoading } = useGetAllTabsQuery(id);
@@ -65,10 +66,12 @@ const Service = () => {
     form.resetFields();
     setImage(null);
     setVideos([null, null]);
+    setSubmitting(false);
   };
 
   const handleSubmit = async () => {
     try {
+      setSubmitting(true);
       const values = await form.validateFields();
 
       // Create the data object with the required structure
@@ -82,8 +85,6 @@ const Service = () => {
             .filter((point) => point.trim() !== ""),
         })),
       };
-
-      console.log(data);
 
       // Create FormData
       const formData = new FormData();
@@ -124,6 +125,7 @@ const Service = () => {
     } catch (error) {
       console.error("Validation failed:", error);
       message.error(error?.data?.message || "Something went wrong!");
+      setSubmitting(false);
     }
   };
 
@@ -424,7 +426,13 @@ const Service = () => {
             </div>
           </div>
 
-          <Button type="primary" block onClick={handleSubmit}>
+          <Button 
+            type="primary" 
+            block 
+            onClick={handleSubmit} 
+            loading={submitting}
+            disabled={submitting}
+          >
             {selectedTabForEdit ? "Update Tab" : "Add Tab"}
           </Button>
         </Form>

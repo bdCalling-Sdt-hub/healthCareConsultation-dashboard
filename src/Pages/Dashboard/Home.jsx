@@ -4,6 +4,7 @@ import GeneralStateSection from "../../components/ui/Home/GeneralStateSection";
 import Professionals from "../../components/ui/Home/Professionals";
 import RevenueStatistics from "../../components/ui/Home/RevenueStatistics";
 import BookingStatistics from "../../components/ui/Home/BookingStatistics";
+import { Spin } from "antd";
 
 const Home = () => {
   const orderSummary = {
@@ -16,7 +17,7 @@ const Home = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={rentMeLogo} alt="" />
+        <Spin />
       </div>
     );
   }

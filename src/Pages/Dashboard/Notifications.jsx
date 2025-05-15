@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ConfigProvider, Pagination } from "antd";
+import { ConfigProvider, Pagination, Spin } from "antd";
 import Title from "../../components/common/Title";
 import {
   useNotificationQuery,
@@ -87,7 +87,7 @@ const Notifications = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={rentMeLogo} alt="" />
+        <Spin />
       </div>
     );
   }
@@ -148,54 +148,60 @@ const Notifications = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-5 bg-white p-4 rounded-lg">
-        {notificationData?.map((notification) => (
-          <div
-            key={notification._id}
-            className={`border-b-[1px] p-2 cursor-pointer rounded-xl border-[#d9d9d9] flex items-center gap-3 ${
-              notification?.isRead ? "" : "bg-gray-200"
-            }`}
-            onClick={() => handleNotificationClick(notification)}
-          >
-            <img
-              style={{
-                height: "50px",
-                width: "50px",
-                borderRadius: "100%",
-                border: "2px solid gray",
-              }}
-              src={getImageUrl(notification?.sender?.profile)}
-              className="object-cover"
-              alt={`${notification?.sender?.name} avatar`}
-            />
-            <div>
-              <p className={`${notification?.isRead ? "" : "font-semibold"}`}>
-                <span>{notification?.sender?.name}</span> <br />
-                {notification?.body}
-              </p>
-              <p style={{ color: "gray", marginTop: "4px" }}>
-                {(() => {
-                  const createdAt = new Date(notification?.createdAt);
-                  const now = new Date();
-                  const diffInMinutes = Math.floor(
-                    (now - createdAt) / (1000 * 60)
-                  );
+        {notificationData?.length > 0 ? (
+          notificationData.map((notification) => (
+            <div
+              key={notification._id}
+              className={`border-b-[1px] p-2 cursor-pointer rounded-xl border-[#d9d9d9] flex items-center gap-3 ${
+                notification?.isRead ? "" : "bg-gray-200"
+              }`}
+              onClick={() => handleNotificationClick(notification)}
+            >
+              <img
+                style={{
+                  height: "50px",
+                  width: "50px",
+                  borderRadius: "100%",
+                  border: "2px solid gray",
+                }}
+                src={getImageUrl(notification?.sender?.profile)}
+                className="object-cover"
+                alt={`${notification?.sender?.name} avatar`}
+              />
+              <div>
+                <p className={`${notification?.isRead ? "" : "font-semibold"}`}>
+                  <span>{notification?.sender?.name}</span> <br />
+                  {notification?.body}
+                </p>
+                <p style={{ color: "gray", marginTop: "4px" }}>
+                  {(() => {
+                    const createdAt = new Date(notification?.createdAt);
+                    const now = new Date();
+                    const diffInMinutes = Math.floor(
+                      (now - createdAt) / (1000 * 60)
+                    );
 
-                  if (diffInMinutes < 1) {
-                    return "<1min ago";
-                  } else if (diffInMinutes < 60) {
-                    return `${diffInMinutes}m ago`;
-                  } else if (diffInMinutes < 1440) {
-                    const hours = Math.floor(diffInMinutes / 60);
-                    return `${hours}h ago`;
-                  } else {
-                    const days = Math.floor(diffInMinutes / 1440);
-                    return `${days}d ago`;
-                  }
-                })()}
-              </p>
+                    if (diffInMinutes < 1) {
+                      return "<1min ago";
+                    } else if (diffInMinutes < 60) {
+                      return `${diffInMinutes}m ago`;
+                    } else if (diffInMinutes < 1440) {
+                      const hours = Math.floor(diffInMinutes / 60);
+                      return `${hours}h ago`;
+                    } else {
+                      const days = Math.floor(diffInMinutes / 1440);
+                      return `${days}d ago`;
+                    }
+                  })()}
+                </p>
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No notifications arrived yet
           </div>
-        ))}
+        )}
       </div>
 
       <div className="flex items-center justify-center mt-6">

@@ -1,3 +1,4 @@
+import { Spin } from "antd";
 import randomImg from "../../../assets/randomProfile2.jpg";
 import salongoLogo from "../../../assets/salon-go-logo.png";
 import { useBestServicesQuery } from "../../../redux/apiSlices/dashboardSlice";
@@ -9,7 +10,7 @@ const Professionals = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <img src={salongoLogo} alt="" />
+        <Spin />
       </div>
     );
   }
