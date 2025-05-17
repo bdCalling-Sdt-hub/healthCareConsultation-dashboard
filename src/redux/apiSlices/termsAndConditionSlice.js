@@ -32,10 +32,40 @@ const termsAndConditionSlice = api.injectEndpoints({
         return data;
       },
     }),
+
+    //public
+
+    createAndUpdateFooterItems: builder.mutation({
+      query: (data) => {
+        console.log("in slice =>", data);
+        return {
+          url: `/public/information`,
+          method: "POST",
+          body: data,
+          headers: {
+            Authorization: `Bearer ${JSON.parse(
+              localStorage.getItem("token")
+            )}`,
+          },
+        };
+      },
+    }),
+
+    getFooterItems: builder.query({
+      query: () => {
+        return {
+          url: `/public/information/get`,
+          method: "GET",
+        };
+      },
+    }),
   }),
 });
 
 export const {
   useTermsAndConditionQuery,
   useUpdateTermsAndConditionsMutation,
+
+  useCreateAndUpdateFooterItemsMutation,
+  useGetFooterItemsQuery,
 } = termsAndConditionSlice;

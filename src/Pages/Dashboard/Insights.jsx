@@ -34,6 +34,11 @@ const { Title } = Typography;
 const InsightsPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingInsight, setEditingInsight] = useState(null);
+  const [chartTitle, setChartTitle] = useState("Growth Rate Data");
+  const [chartDescription, setChartDescription] = useState(
+    "Enter monthly values for the website performance chart."
+  );
+  const [isEditingChart, setIsEditingChart] = useState(false);
   const [growthData, setGrowthData] = useState([
     { month: "Jan", value: 0 },
     { month: "Feb", value: 0 },
@@ -63,7 +68,21 @@ const InsightsPage = () => {
     if (insightsChartData?.data?.length > 0) {
       const chartData = insightsChartData.data[0]?.chartData || [];
       if (chartData.length > 0) {
-        setGrowthData(chartData);
+        // Ensure we maintain 12 months structure
+        const updatedData = [...growthData];
+        chartData.forEach((item, index) => {
+          if (index < 12) {
+            updatedData[index].value = item.value;
+          }
+        });
+        setGrowthData(updatedData);
+      }
+      // Set chart title and description if available
+      if (insightsChartData.data[0]?.title) {
+        setChartTitle(insightsChartData.data[0]?.title);
+      }
+      if (insightsChartData.data[0]?.description) {
+        setChartDescription(insightsChartData.data[0]?.description);
       }
     }
   }, [insightsChartData]);
@@ -115,27 +134,24 @@ const InsightsPage = () => {
 
   const handleSaveGrowthData = async () => {
     try {
-      // Check if we're updating or creating
-      const isUpdate = insightsChartData?.data?.length > 0;
-      const chartId = isUpdate ? insightsChartData.data[0]?._id : null;
-
       const payload = {
-        chartData: growthData,
+        data: growthData,
+        title: chartTitle,
+        description: chartDescription,
       };
 
-      if (chartId) {
-        payload.id = chartId;
-      }
+      console.log(payload);
 
-      const response = await createInsightChart(growthData).unwrap();
+      const response = await createInsightChart(payload).unwrap();
 
       if (response.success) {
-        message.success("Growth data saved successfully!");
+        message.success("Chart data saved successfully!");
+        setIsEditingChart(false);
       } else {
-        message.error(response.message || "Failed to save growth data");
+        message.error(response.message || "Failed to save chart data");
       }
     } catch (error) {
-      console.error("Error saving growth data:", error);
+      console.error("Error saving chart data:", error);
       message.error(error?.data?.message || "Something went wrong!");
     }
   };
@@ -209,12 +225,39 @@ const InsightsPage = () => {
 
       <div className="mt-8">
         <Card className="shadow-sm">
-          <Title level={4} className="mb-4">
-            Growth Rate Data
-          </Title>
-          <p className="text-gray-600 mb-4">
-            Enter monthly growth rate values for the website performance chart.
-          </p>
+          <div className="flex justify-between items-center mb-4">
+            {isEditingChart ? (
+              <Input
+                value={chartTitle}
+                onChange={(e) => setChartTitle(e.target.value)}
+                placeholder="Enter chart title (e.g., Obesity Rates, Heart Failure Statistics)"
+                className="font-bold text-lg w-1/2"
+              />
+            ) : (
+              <Title level={4} className="mb-0">
+                {chartTitle}
+              </Title>
+            )}
+            <Button
+              type={isEditingChart ? "default" : "primary"}
+              icon={isEditingChart ? <SaveOutlined /> : <EditOutlined />}
+              onClick={() => setIsEditingChart(!isEditingChart)}
+            >
+              {isEditingChart ? "Cancel" : "Edit Chart"}
+            </Button>
+          </div>
+
+          {isEditingChart ? (
+            <Input.TextArea
+              value={chartDescription}
+              onChange={(e) => setChartDescription(e.target.value)}
+              placeholder="Enter chart description (e.g., Monthly obesity rates across the US)"
+              className="mb-4"
+              rows={2}
+            />
+          ) : (
+            <p className="text-gray-600 mb-4">{chartDescription}</p>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {growthData.map((item, index) => (
@@ -241,7 +284,7 @@ const InsightsPage = () => {
               onClick={handleSaveGrowthData}
               className="bg-primary"
             >
-              Save Growth Data
+              Save Chart Data
             </Button>
           </div>
         </Card>

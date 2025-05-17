@@ -25,6 +25,7 @@ import PrivateRoute from "./PrivateRoute";
 import Review from "../Pages/Dashboard/Review";
 import AboutUs from "../Pages/Dashboard/AboutUs";
 import Challenges from "../Pages/Dashboard/Challenges";
+import PublicInfo from "../Pages/Dashboard/PublicInfo";
 
 const router = createBrowserRouter([
   {
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: "/personal-information",
         element: <UserProfile />,
+      },
+      {
+        path: "/public-information",
+        element: <PublicInfo />,
       },
       {
         path: "/change-password",

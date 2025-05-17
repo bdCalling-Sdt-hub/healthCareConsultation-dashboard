@@ -6,7 +6,7 @@ const authSlice = api.injectEndpoints({
       query: (data) => {
         return {
           method: "POST",
-          url: "auth/verify-email",
+          url: "auth/verify-account",
           body: data,
         };
       },

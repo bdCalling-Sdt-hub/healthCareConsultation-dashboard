@@ -103,6 +103,17 @@ const Sidebar = () => {
           ),
         },
         {
+          key: "/public-information",
+          label: (
+            <Link
+              to="/public-information"
+              className="text-white hover:text-white"
+            >
+              Public Information
+            </Link>
+          ),
+        },
+        {
           key: "/change-password",
           label: (
             <Link to="/change-password" className="text-white hover:text-white">

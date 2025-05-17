@@ -45,8 +45,10 @@ const Service = () => {
     );
   }
 
-  const serviceData = service?.data || [];
+  const serviceData = service?.data?.result || [];
   const tabs = getTabs?.data || [];
+
+  console.log("svgsdfbvsbsdfb", serviceData);
 
   const handleImageUpload = (file) => {
     setImage(file);
@@ -426,10 +428,10 @@ const Service = () => {
             </div>
           </div>
 
-          <Button 
-            type="primary" 
-            block 
-            onClick={handleSubmit} 
+          <Button
+            type="primary"
+            block
+            onClick={handleSubmit}
             loading={submitting}
             disabled={submitting}
           >

@@ -11,8 +11,8 @@ const ResetPassword = () => {
   const [resetPassword] = useResetPasswordMutation(); // Destructure mutation with loading state
 
   const onFinish = async (values) => {
-    console.log({ email, ...values });
-    const data = { email, ...values }; // Combine email and new password values into an object
+    // console.log({ email, ...values });
+    const data = { ...values }; // Combine email and new password values into an object
 
     try {
       const response = await resetPassword(data).unwrap();
@@ -107,11 +107,11 @@ const ResetPassword = () => {
               height: 45,
               fontWeight: "400px",
               fontSize: "18px",
-              background: "#8b0000",
               marginTop: 20,
               borderRadius: "8px",
               color: "white",
             }}
+            className="bg-primary"
           >
             Update
           </Button>
