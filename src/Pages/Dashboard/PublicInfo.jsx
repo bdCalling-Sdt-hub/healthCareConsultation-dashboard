@@ -312,12 +312,15 @@ const PublicInfo = () => {
               {
                 required: true,
                 message: "Please enter a footer description",
+                max: 200,
               },
             ]}
           >
             <TextArea
               rows={4}
-              placeholder="Enter a description for your website footer"
+              placeholder="Enter a brief description (max 200 characters)"
+              maxLength={80}
+              showCount
             />
           </Form.Item>
 
