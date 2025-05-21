@@ -40,18 +40,18 @@ const InsightsPage = () => {
   );
   const [isEditingChart, setIsEditingChart] = useState(false);
   const [growthData, setGrowthData] = useState([
-    { month: "Jan", value: 0 },
-    { month: "Feb", value: 0 },
-    { month: "Mar", value: 0 },
-    { month: "Apr", value: 0 },
-    { month: "May", value: 0 },
-    { month: "Jun", value: 0 },
-    { month: "Jul", value: 0 },
-    { month: "Aug", value: 0 },
-    { month: "Sep", value: 0 },
-    { month: "Oct", value: 0 },
-    { month: "Nov", value: 0 },
-    { month: "Dec", value: 0 },
+    { name: "Jan", value: 0 },
+    { name: "Feb", value: 0 },
+    { name: "Mar", value: 0 },
+    { name: "Apr", value: 0 },
+    { name: "May", value: 0 },
+    { name: "Jun", value: 0 },
+    { name: "Jul", value: 0 },
+    { name: "Aug", value: 0 },
+    { name: "Sep", value: 0 },
+    { name: "Oct", value: 0 },
+    { name: "Nov", value: 0 },
+    { name: "Dec", value: 0 },
   ]);
 
   // console.log(editingInsight);
@@ -138,6 +138,7 @@ const InsightsPage = () => {
         data: growthData,
         title: chartTitle,
         description: chartDescription,
+        type: "graph",
       };
 
       console.log(payload);
@@ -261,8 +262,8 @@ const InsightsPage = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {growthData.map((item, index) => (
-              <div key={item.month} className="mb-4">
-                <Form.Item label={item.month} className="mb-1">
+              <div key={item.name} className="mb-4">
+                <Form.Item label={item.name} className="mb-1">
                   <Input
                     type="number"
                     value={item.value}

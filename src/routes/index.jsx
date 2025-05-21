@@ -26,6 +26,7 @@ import Review from "../Pages/Dashboard/Review";
 import AboutUs from "../Pages/Dashboard/AboutUs";
 import Challenges from "../Pages/Dashboard/Challenges";
 import PublicInfo from "../Pages/Dashboard/PublicInfo";
+import ViewFiles from "../Pages/Dashboard/ViewFiles";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "/users",
         element: <Users />,
+      },
+      {
+        path: "/view-files/:id",
+        element: <ViewFiles />,
       },
       {
         path: "/personal-information",

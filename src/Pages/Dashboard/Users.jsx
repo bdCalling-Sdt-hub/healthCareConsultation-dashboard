@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Table, Space, Avatar, Modal, Spin } from "antd";
+import { Table, Space, Avatar, Modal, Spin, Tooltip } from "antd";
 import { FaEye } from "react-icons/fa";
 import randomImg from "../../assets/randomProfile2.jpg";
 import { useUsersQuery } from "../../redux/apiSlices/userSlice";
 import { getImageUrl } from "../../utils/getImageUrl";
+import pdfLogo from "../../assets/folder.png";
+import { Link } from "react-router-dom";
 
 const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -84,12 +86,18 @@ const Users = () => {
       title: "Actions",
       key: "actions",
       render: (text, record) => (
-        <Space>
+        <Space className="space-x-3">
           <FaEye
             size={20}
             className="text-blue-500 cursor-pointer hover:text-blue-700"
             onClick={() => showUserDetails(record)}
           />
+
+          <Link to={`/view-files/${record?._id}`}>
+            <Tooltip title="View Files">
+              <img src={pdfLogo} alt="" className="w-6 h-6 cursor-pointer" />
+            </Tooltip>
+          </Link>
         </Space>
       ),
     },
