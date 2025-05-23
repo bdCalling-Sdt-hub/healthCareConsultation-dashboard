@@ -37,6 +37,25 @@ const userSlice = api.injectEndpoints({
         };
       },
     }),
+
+    getFilesByUserId: builder.query({
+      query: (id) => {
+        return {
+          method: "GET",
+          url: `/file/user/${id}`,
+        };
+      },
+    }),
+
+    downloadFile: builder.mutation({
+      query: (id) => {
+        return {
+          method: "GET",
+          url: `/file/download/${id}`,
+          responseHandler: (response) => response.blob(),
+        };
+      },
+    }),
   }),
 });
 
@@ -45,4 +64,6 @@ export const {
   useUsersQuery,
   useVendorsQuery,
   useUserByIdQuery,
+  useGetFilesByUserIdQuery,
+  useDownloadFileMutation,
 } = userSlice;
