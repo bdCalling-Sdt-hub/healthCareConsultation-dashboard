@@ -103,6 +103,8 @@ const insightsSlice = api.injectEndpoints({
     // chart
     createInsightChart: builder.mutation({
       query: (data) => {
+        console.log("from redux", data);
+
         return {
           method: "POST",
           url: `/dashboard/chart`,
