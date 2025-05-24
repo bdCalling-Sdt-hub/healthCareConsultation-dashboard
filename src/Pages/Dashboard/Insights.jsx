@@ -57,6 +57,7 @@ const InsightsPage = () => {
   const [serviceChartDescription, setServiceChartDescription] = useState(
     "Distribution of our most popular healthcare services."
   );
+  const [chartFooter, setChartFooter] = useState(""); // 1. Add state for footer
 
   const months = [
     "Jan",
@@ -110,6 +111,11 @@ const InsightsPage = () => {
         }
         if (chartItem.description) {
           setChartDescription(chartItem.description);
+        }
+        if (chartItem.footer) {
+          setChartFooter(chartItem.footer);
+        } else {
+          setChartFooter("");
         }
       }
     }
@@ -223,11 +229,12 @@ const InsightsPage = () => {
       const payload = {
         title: chartTitle,
         description: chartDescription,
+        footer: chartFooter, // 2. Add footer to payload
         type: "graph",
         data: growthData,
       };
 
-      console.log(payload);
+      // console.log(payload);
 
       const response = await createInsightChart(payload).unwrap();
 
@@ -504,6 +511,21 @@ const InsightsPage = () => {
                 <p>No chart data available. Click "Edit Chart" to add data.</p>
               )}
             </div>
+          )}
+
+          {/* Footer textarea below months */}
+          {isEditingChart ? (
+            <Input.TextArea
+              value={chartFooter}
+              onChange={(e) => setChartFooter(e.target.value)}
+              placeholder="Enter chart footer (e.g., Source: CDC, 2024)"
+              className="mb-4"
+              rows={2}
+            />
+          ) : (
+            chartFooter && (
+              <div className="text-xs text-gray-500 mb-4">{chartFooter}</div>
+            )
           )}
 
           <div className="flex justify-end mt-4">
