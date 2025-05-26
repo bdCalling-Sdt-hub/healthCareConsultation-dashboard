@@ -306,20 +306,39 @@ const PublicInfo = () => {
           </div>
 
           <Form.Item
+            name="contactDescription"
+            label="Contact Description"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a Contact page description",
+                max: 100,
+              },
+            ]}
+          >
+            <TextArea
+              rows={4}
+              placeholder="Enter a brief description (max 100 characters)"
+              maxLength={100}
+              showCount
+            />
+          </Form.Item>
+
+          <Form.Item
             name="footerDescription"
             label="Footer Description"
             rules={[
               {
                 required: true,
                 message: "Please enter a footer description",
-                max: 200,
+                max: 100,
               },
             ]}
           >
             <TextArea
               rows={4}
-              placeholder="Enter a brief description (max 200 characters)"
-              maxLength={80}
+              placeholder="Enter a brief description (max 100 characters)"
+              maxLength={100}
               showCount
             />
           </Form.Item>

@@ -254,26 +254,86 @@ const InsightsPage = () => {
     setServiceValue(parseInt(value) || 0);
   };
 
+  // Add USA states array
+  const usaStates = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+  ];
+
   const handleAddService = () => {
     if (!selectedService) {
-      message.error("Please select a service");
+      message.error("Please select a state");
       return;
     }
 
-    // Find the selected service details
-    const serviceDetails = allServicesData.find(
-      (service) => service._id === selectedService
+    // Check if already reached maximum of 6 states
+    if (serviceData.length >= 6) {
+      message.error("Maximum of 6 states can be selected");
+      return;
+    }
+
+    // Check if state is already selected
+    const stateExists = serviceData.some(
+      (item) => item.name === selectedService
     );
 
-    if (!serviceDetails) {
-      message.error("Service not found");
+    if (stateExists) {
+      message.error(`${selectedService} already exists`);
       return;
     }
 
     const newService = {
-      name: serviceDetails.title,
+      name: selectedService,
       value: serviceValue,
-      id: serviceDetails._id,
+      id: selectedService.toLowerCase().replace(/\s+/g, "-"), // Create ID from state name
     };
 
     setServiceData([...serviceData, newService]);
@@ -542,7 +602,7 @@ const InsightsPage = () => {
         </Card>
       </div>
 
-      {/* Services section */}
+      {/* {/* Services section */}
       <div className="mt-8">
         <Card className="shadow-sm">
           <div className="flex justify-between items-center mb-4">
@@ -581,30 +641,30 @@ const InsightsPage = () => {
 
           {isEditingServices && (
             <div className="mb-6 p-4 bg-gray-50 rounded-md">
-              <h3 className="text-lg font-medium mb-3">Add New Service</h3>
+              <h3 className="text-lg font-medium mb-3">Add New State</h3>
+              <p className="text-sm text-gray-500 mb-3">
+                Select up to 6 states to display in the chart. {serviceData.length}/6 states selected.
+              </p>
               <div className="flex flex-wrap gap-4 items-end">
                 <div className="w-64">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service
+                    State
                   </label>
                   <Select
-                    placeholder="Select service"
+                    placeholder="Select state"
                     className="w-full"
                     value={selectedService}
                     onChange={(value) => setSelectedService(value)}
+                    disabled={serviceData.length >= 6}
                   >
-                    {allServicesData.map((service) => {
-                      // Check if service is already selected
+                    {usaStates.map((state) => {
+                      // Check if state is already selected
                       const isSelected = serviceData.some(
-                        (item) => item.id === service._id
+                        (item) => item.name === state
                       );
                       return (
-                        <Option
-                          key={service._id}
-                          value={service._id}
-                          disabled={isSelected}
-                        >
-                          {service.title} {isSelected && "(Already added)"}
+                        <Option key={state} value={state} disabled={isSelected}>
+                          {state} {isSelected && "(Already added)"}
                         </Option>
                       );
                     })}
@@ -627,7 +687,7 @@ const InsightsPage = () => {
                   onClick={handleAddService}
                   className="bg-primary"
                 >
-                  Add Service
+                  Add State
                 </Button>
               </div>
             </div>
@@ -671,12 +731,10 @@ const InsightsPage = () => {
           {serviceData.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               {isEditingServices ? (
-                <p>
-                  No services added yet. Use the form above to add services.
-                </p>
+                <p>No states added yet. Use the form above to add states.</p>
               ) : (
                 <p>
-                  No service data available. Click "Edit Services Chart" to add
+                  No chart data available. Click "Edit Services Chart" to add
                   data.
                 </p>
               )}
@@ -691,19 +749,16 @@ const InsightsPage = () => {
               className="bg-primary"
               disabled={!isEditingServices}
             >
-              Save Service Data
+              Save Chart Data
             </Button>
           </div>
         </Card>
       </div>
 
       <AddAndEditInsightModal
-        visible={isModalVisible}
-        onClose={() => {
-          setIsModalVisible(false);
-          setEditingInsight(null);
-        }}
-        initialData={editingInsight}
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        editingInsight={editingInsight}
       />
     </div>
   );
