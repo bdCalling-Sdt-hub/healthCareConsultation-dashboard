@@ -32,6 +32,7 @@ import {
 import { getImageUrl } from "../../utils/getImageUrl";
 import moment from "moment";
 import { useGetAllServicesQuery } from "../../redux/apiSlices/serviceSlice";
+import toast from "react-hot-toast";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -251,7 +252,7 @@ const InsightsPage = () => {
   };
 
   const handleServiceValueChange = (value) => {
-    setServiceValue(parseInt(value) || 0);
+    setServiceValue(parseFloat(value) || 0);
   };
 
   // Add USA states array
@@ -306,6 +307,7 @@ const InsightsPage = () => {
     "West Virginia",
     "Wisconsin",
     "Wyoming",
+    "All Others",
   ];
 
   const handleAddService = () => {
@@ -332,7 +334,7 @@ const InsightsPage = () => {
 
     const newService = {
       name: selectedService,
-      value: serviceValue,
+      value: parseFloat(serviceValue) || 0,
       id: selectedService.toLowerCase().replace(/\s+/g, "-"), // Create ID from state name
     };
 
@@ -349,7 +351,7 @@ const InsightsPage = () => {
 
   const handleServiceDataChange = (index, value) => {
     const newData = [...serviceData];
-    newData[index].value = parseInt(value) || 0;
+    newData[index].value = parseFloat(value) || 0;
     setServiceData(newData);
   };
 
@@ -364,17 +366,33 @@ const InsightsPage = () => {
 
       console.log(payload);
 
+      const totalValue = payload.data.reduce(
+        (total, item) => total + (parseFloat(item.value) || 0),
+        0
+      );
+
+      // Allow a small floating point tolerance
+      if (Math.abs(totalValue - 100) > 0.01) {
+        toast.error("Total value must be 100%");
+        return;
+      }
+
+      if (payload.data.length > 6) {
+        toast.error("Maximum of 6 states can be selected");
+        return;
+      }
+
       const response = await createInsightChart(payload).unwrap();
 
       if (response.success) {
-        message.success("Service chart data saved successfully!");
+        toast.success("Pie chart data saved successfully!");
         setIsEditingServices(false);
       } else {
-        message.error(response.message || "Failed to save service chart data");
+        toast.error(response.message || "Failed to save pie chart data");
       }
     } catch (error) {
-      console.error("Error saving service chart data:", error);
-      message.error(error?.data?.message || "Something went wrong!");
+      console.error("Error saving pie chart data:", error);
+      toast.error(error?.data?.message || "Something went wrong!");
     }
   };
 
@@ -623,7 +641,7 @@ const InsightsPage = () => {
               icon={isEditingServices ? <SaveOutlined /> : <EditOutlined />}
               onClick={() => setIsEditingServices(!isEditingServices)}
             >
-              {isEditingServices ? "Cancel" : "Edit Services Chart"}
+              {isEditingServices ? "Cancel" : "Edit Pie Chart"}
             </Button>
           </div>
 
@@ -643,7 +661,8 @@ const InsightsPage = () => {
             <div className="mb-6 p-4 bg-gray-50 rounded-md">
               <h3 className="text-lg font-medium mb-3">Add New State</h3>
               <p className="text-sm text-gray-500 mb-3">
-                Select up to 6 states to display in the chart. {serviceData.length}/6 states selected.
+                Select up to 6 states to display in the chart.{" "}
+                {serviceData.length}/6 states selected.
               </p>
               <div className="flex flex-wrap gap-4 items-end">
                 <div className="w-64">

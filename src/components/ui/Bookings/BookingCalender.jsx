@@ -68,7 +68,7 @@ const BookingCalendar = ({ bookingsData }) => {
     return data.map((booking) => {
       // Parse the scheduledAt directly without timezone conversion
       const scheduledDate = dayjs(booking.scheduledAt);
-      
+
       return {
         id: booking._id,
         date: scheduledDate.format("YYYY-MM-DD"),

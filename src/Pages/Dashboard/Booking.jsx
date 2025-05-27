@@ -1,9 +1,26 @@
 import React, { useState } from "react";
-import { Table, Tabs, Modal, Button, Spin } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Tabs,
+  Modal,
+  Button,
+  Spin,
+  Space,
+  Tag,
+  message,
+  Popconfirm,
+} from "antd";
+import {
+  EyeOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
 import BookingCalendar from "../../components/ui/Bookings/BookingCalender";
 import BookingSlots from "../../components/ui/Bookings/BookingSlots";
-import { useAllBookingsQuery } from "../../redux/apiSlices/bookingSlice";
+import {
+  useAllBookingsQuery,
+  useUpdateBookingsMutation,
+} from "../../redux/apiSlices/bookingSlice";
 import moment from "moment/moment";
 import { imageUrl } from "../../redux/api/baseApi";
 
@@ -13,7 +30,11 @@ const Bookings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
-  const { data: allBookings, isLoading } = useAllBookingsQuery();
+  const { data: allBookings, isLoading, refetch } = useAllBookingsQuery();
+  const [updateBookingStatus, { isLoading: isUpdating }] =
+    useUpdateBookingsMutation();
+
+  // Check if the data is loaded before rendering the componen
 
   if (isLoading)
     return (
@@ -32,6 +53,50 @@ const Bookings = () => {
   const handleCancel = () => {
     setIsModalOpen(false);
     setSelectedBooking(null);
+  };
+
+  // Improved status update handler with confirmation and feedback
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      // Format the request body correctly with status in lowercase
+      await updateBookingStatus({
+        id,
+        data: { status: newStatus.toLowerCase() },
+      }).unwrap();
+
+      message.success(`Booking marked as ${newStatus} successfully`);
+      refetch(); // Refresh the data to show updated status
+    } catch (error) {
+      message.error(
+        `Failed to update booking status: ${error.message || "Unknown error"}`
+      );
+    }
+  };
+
+  // Status tag renderer with appropriate colors
+  const renderStatusTag = (status) => {
+    // Convert status to title case for display
+    const displayStatus =
+      status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+
+    let color;
+    switch (status.toLowerCase()) {
+      case "approved":
+        color = "green";
+        break;
+      case "pending":
+        color = "orange";
+        break;
+      case "cancelled":
+        color = "red";
+        break;
+      case "completed":
+        color = "blue";
+        break;
+      default:
+        color = "default";
+    }
+    return <Tag color={color}>{displayStatus}</Tag>;
   };
 
   const columns = [
@@ -53,32 +118,70 @@ const Bookings = () => {
       ),
     },
     {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
       title: "Booking Status",
       dataIndex: "status",
       key: "status",
-      render: (status) => (
-        <span
-          style={{
-            color:
-              status === "Approved"
-                ? "green"
-                : status === "Pending"
-                ? "orange"
-                : "red",
-          }}
-        >
-          {status}
-        </span>
-      ),
+      render: (status) => renderStatusTag(status),
     },
     {
       title: "Action",
       key: "action",
       render: (_, record) => (
-        <EyeOutlined
-          style={{ color: "#1890ff", cursor: "pointer" }}
-          onClick={() => handleViewDetails(record)}
-        />
+        <Space>
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            size="small"
+            onClick={() => handleViewDetails(record)}
+          >
+            View
+          </Button>
+
+          {record.status.toLowerCase() !== "cancelled" &&
+            record.status.toLowerCase() !== "completed" && (
+              <Popconfirm
+                title="Are you sure you want to cancel this booking?"
+                onConfirm={() => handleStatusUpdate(record._id, "cancelled")}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button
+                  type="primary"
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  size="small"
+                  loading={isUpdating}
+                >
+                  Cancel
+                </Button>
+              </Popconfirm>
+            )}
+
+          {record.status.toLowerCase() !== "completed" &&
+            record.status.toLowerCase() !== "cancelled" && (
+              <Popconfirm
+                title="Mark this booking as completed?"
+                onConfirm={() => handleStatusUpdate(record._id, "completed")}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  size="small"
+                  style={{ backgroundColor: "#52c41a" }}
+                  loading={isUpdating}
+                >
+                  Complete
+                </Button>
+              </Popconfirm>
+            )}
+        </Space>
       ),
     },
   ];
@@ -100,7 +203,7 @@ const Bookings = () => {
           <Table
             columns={columns}
             dataSource={bookingsData}
-            pagination={{ pageSize: 5 }}
+            pagination={{ pageSize: 10 }}
             style={{ marginTop: "16px" }}
             rowKey={"_id"}
           />
