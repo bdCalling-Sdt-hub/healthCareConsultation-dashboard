@@ -65,28 +65,33 @@ const BookingCalendar = ({ bookingsData }) => {
   const formatBookings = (data) => {
     if (!data || !Array.isArray(data)) return [];
 
-    return data.map((booking) => ({
-      id: booking._id,
-      date: dayjs(booking.scheduledAt).format("YYYY-MM-DD"),
-      time: dayjs(booking.scheduledAt).format("HH:mm"),
-      // startTime: getTimeFromCode(booking.timeCode),
-      // endTime: getTimeFromCode(booking.timeCode + 100), // Assuming 1 hour duration
-      title: booking.service?.title || "Appointment",
-      paymentMethod: booking.paymentMethod || "physical",
-      price: booking.fee,
-      clientMessage: booking.message,
-      firstName: booking.firstName,
-      lastName: booking.lastName,
-      email: booking.email,
-      contact: booking.contact,
-      link: booking.link,
-      status: booking.status,
-      industry: booking.industry,
-      country: booking.country,
-      state: booking.state,
-      timezone: booking.timezone, // Add timezone property
-      note: booking.note, // Admin note (your instructions to client)
-    }));
+    return data.map((booking) => {
+      // Parse the scheduledAt directly without timezone conversion
+      const scheduledDate = dayjs(booking.scheduledAt);
+      
+      return {
+        id: booking._id,
+        date: scheduledDate.format("YYYY-MM-DD"),
+        time: scheduledDate.format("hh:mm A"), // Use 12-hour format with AM/PM
+        // startTime: getTimeFromCode(booking.timeCode),
+        // endTime: getTimeFromCode(booking.timeCode + 100), // Assuming 1 hour duration
+        title: booking.service?.title || "Appointment",
+        paymentMethod: booking.paymentMethod || "physical",
+        price: booking.fee,
+        clientMessage: booking.message,
+        firstName: booking.firstName,
+        lastName: booking.lastName,
+        email: booking.email,
+        contact: booking.contact,
+        link: booking.link,
+        status: booking.status,
+        industry: booking.industry,
+        country: booking.country,
+        state: booking.state,
+        timezone: booking.timezone, // Add timezone property
+        note: booking.note, // Admin note (your instructions to client)
+      };
+    });
   };
 
   // State to hold bookings
@@ -218,15 +223,13 @@ const BookingCalendar = ({ bookingsData }) => {
       timeCode = 900; // Default to 900 (9:00 AM)
     }
 
-    // Format the time in 12-hour format with AM/PM
-    const formattedTime = values.timeSlot
-      ? dayjs(values.timeSlot, "HH:mm").format("hh:mm A")
-      : bookings[editingBooking].time;
+    // Use the selected time slot directly without formatting
+    const selectedTime = values.timeSlot || bookings[editingBooking].time;
 
     // Create the updated booking data according to the required format
     const updateData = {
       date: values.date.format("YYYY-MM-DD"),
-      time: formattedTime, // Use the formatted time in 12-hour format
+      time: selectedTime,
       timeCode: timeCode,
       link: values.link,
       note: values.adminNote,
@@ -246,7 +249,7 @@ const BookingCalendar = ({ bookingsData }) => {
         const updatedBooking = {
           ...bookings[editingBooking],
           date: values.date.format("YYYY-MM-DD"),
-          time: formattedTime, // Use the formatted time here too
+          time: selectedTime,
           title: values.title,
           paymentMethod: values.paymentMethod,
           price: values.price,
@@ -282,7 +285,7 @@ const BookingCalendar = ({ bookingsData }) => {
                   <strong>{item.title}</strong>
                 </p>
                 <p>{`${item.firstName} ${item.lastName}`}</p>
-                <p>{dayjs(item.time, "HH:mm").format("hh:mm A")}</p>
+                <p>{item.time}</p>
                 <p>Status: {item.status}</p>
               </div>
             }
@@ -305,7 +308,7 @@ const BookingCalendar = ({ bookingsData }) => {
                 }
               />
               <span className="ml-1 text-xs truncate max-w-[80%]">
-                {dayjs(item.time, "HH:mm").format("hh:mm A")} {item.firstName}
+                {item.time} {item.firstName}
               </span>
             </li>
           </Tooltip>
