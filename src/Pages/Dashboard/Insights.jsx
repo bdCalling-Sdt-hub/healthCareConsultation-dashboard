@@ -357,42 +357,46 @@ const InsightsPage = () => {
 
   const handleSaveServiceData = async () => {
     try {
-      const payload = {
-        title: serviceChartTitle,
-        description: serviceChartDescription,
-        type: "pie",
-        data: serviceData,
-      };
-
-      console.log(payload);
-
-      const totalValue = payload.data.reduce(
+      let payloadData = [...serviceData];
+      // Remove any existing 'All Others' before calculation
+      payloadData = payloadData.filter(item => item.name !== 'All Others');
+      let totalValue = payloadData.reduce(
         (total, item) => total + (parseFloat(item.value) || 0),
         0
       );
-
-      // Allow a small floating point tolerance
-      if (Math.abs(totalValue - 100) > 0.01) {
-        toast.error("Total value must be 100%");
+      // If total is less than 100, add 'All Others'
+      if (totalValue < 100) {
+        payloadData.push({
+          name: 'All Others',
+          value: +(100 - totalValue).toFixed(2),
+          id: 'all-others',
+        });
+        totalValue = 100;
+      }
+      // Hide 'All Others' if its value is 100
+      payloadData = payloadData.filter(
+        item => !(item.name === 'All Others' && item.value === 100)
+      );
+      if (payloadData.length > 6) {
+        toast.error('Maximum of 6 states can be selected');
         return;
       }
-
-      if (payload.data.length > 6) {
-        toast.error("Maximum of 6 states can be selected");
-        return;
-      }
-
+      const payload = {
+        title: serviceChartTitle,
+        description: serviceChartDescription,
+        type: 'pie',
+        data: payloadData,
+      };
       const response = await createInsightChart(payload).unwrap();
-
       if (response.success) {
-        toast.success("Pie chart data saved successfully!");
+        toast.success('Pie chart data saved successfully!');
         setIsEditingServices(false);
       } else {
-        toast.error(response.message || "Failed to save pie chart data");
+        toast.error(response.message || 'Failed to save pie chart data');
       }
     } catch (error) {
-      console.error("Error saving pie chart data:", error);
-      toast.error(error?.data?.message || "Something went wrong!");
+      console.error('Error saving pie chart data:', error);
+      toast.error(error?.data?.message || 'Something went wrong!');
     }
   };
 

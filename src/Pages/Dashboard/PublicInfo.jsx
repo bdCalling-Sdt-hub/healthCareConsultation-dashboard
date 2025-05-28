@@ -312,14 +312,14 @@ const PublicInfo = () => {
               {
                 required: true,
                 message: "Please enter a Contact page description",
-                max: 100,
+                max: 200,
               },
             ]}
           >
             <TextArea
               rows={4}
               placeholder="Enter a brief description (max 100 characters)"
-              maxLength={100}
+              maxLength={200}
               showCount
             />
           </Form.Item>
@@ -331,14 +331,14 @@ const PublicInfo = () => {
               {
                 required: true,
                 message: "Please enter a footer description",
-                max: 100,
+                max: 200,
               },
             ]}
           >
             <TextArea
               rows={4}
               placeholder="Enter a brief description (max 100 characters)"
-              maxLength={100}
+              maxLength={200}
               showCount
             />
           </Form.Item>
