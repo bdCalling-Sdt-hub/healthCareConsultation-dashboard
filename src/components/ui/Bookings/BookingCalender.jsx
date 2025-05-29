@@ -88,6 +88,7 @@ const BookingCalendar = ({ bookingsData }) => {
         industry: booking.industry,
         country: booking.country,
         state: booking.state,
+        duration: booking.duration || 30,
         timezone: booking.timezone, // Add timezone property
         note: booking.note, // Admin note (your instructions to client)
       };
@@ -171,6 +172,7 @@ const BookingCalendar = ({ bookingsData }) => {
       price: booking.price,
       link: booking.link, // Changed from meetingLink to link
       title: booking.title,
+      duration: booking.duration || 30, // Duration in minutes
       message: booking.clientMessage, // Client's message
       adminNote: booking.note, // Admin note (your instructions to client)
     });
@@ -236,6 +238,7 @@ const BookingCalendar = ({ bookingsData }) => {
       paymentRequired: values.paymentMethod === "online",
       paymentMethod: values.paymentMethod,
       fee: values.price,
+      duration: values.duration,
     };
 
     // Call the update API
@@ -423,6 +426,28 @@ const BookingCalendar = ({ bookingsData }) => {
                   </Form.Item>
 
                   <Form.Item
+                    label={
+                      <div className="flex items-center gap-2">
+                        <ClockCircleOutlined />
+                        <span>Duration</span>
+                      </div>
+                    }
+                    name="duration"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select appointment duration",
+                      },
+                    ]}
+                  >
+                    <Select className="w-full" placeholder="Select duration">
+                      <Option value={30}>30 minutes</Option>
+                      <Option value={45}>45 minutes</Option>
+                      <Option value={60}>60 minutes</Option>
+                    </Select>
+                  </Form.Item>
+
+                  <Form.Item
                     label="Appointment Title"
                     name="title"
                     rules={[
@@ -517,12 +542,12 @@ const BookingCalendar = ({ bookingsData }) => {
                         </div>
                       }
                       name="price"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter consultation fee",
-                        },
-                      ]}
+                      // rules={[
+                      //   {
+                      //     required: true,
+                      //     message: "Please enter consultation fee",
+                      //   },
+                      // ]}
                       className="mb-2"
                     >
                       <InputNumber

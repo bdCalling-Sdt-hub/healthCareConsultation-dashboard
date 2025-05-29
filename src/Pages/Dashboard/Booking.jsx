@@ -106,6 +106,14 @@ const Bookings = () => {
       key: "scheduledAt",
       render: (date) => moment(date).format("DD MMM YYYY - hh:mm A"),
     },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      render: (_, record) => (
+        <p>{record?.duration ? `${record.duration} min` : "N/A"}</p>
+      ),
+    },
     { title: "Service", dataIndex: ["service", "title"], key: "service" },
     {
       title: "Client",

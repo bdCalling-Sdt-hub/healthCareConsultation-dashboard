@@ -33,6 +33,7 @@ import { getImageUrl } from "../../utils/getImageUrl";
 import moment from "moment";
 import { useGetAllServicesQuery } from "../../redux/apiSlices/serviceSlice";
 import toast from "react-hot-toast";
+import JoditEditor from "jodit-react";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -158,9 +159,10 @@ const InsightsPage = () => {
 
   const allInsights = insights?.data;
   const allServicesData = allServices?.data;
-  console.log(allServicesData);
+  // console.log(allServicesData);
 
   const handleEdit = (record) => {
+    console.log("edit clicked", record);
     setEditingInsight(record);
     setIsModalVisible(true);
   };
@@ -184,6 +186,7 @@ const InsightsPage = () => {
   };
 
   const handleAdd = () => {
+    console.log("add clicked");
     setEditingInsight(null);
     setIsModalVisible(true);
   };
@@ -359,7 +362,7 @@ const InsightsPage = () => {
     try {
       let payloadData = [...serviceData];
       // Remove any existing 'All Others' before calculation
-      payloadData = payloadData.filter(item => item.name !== 'All Others');
+      payloadData = payloadData.filter((item) => item.name !== "All Others");
       let totalValue = payloadData.reduce(
         (total, item) => total + (parseFloat(item.value) || 0),
         0
@@ -367,36 +370,36 @@ const InsightsPage = () => {
       // If total is less than 100, add 'All Others'
       if (totalValue < 100) {
         payloadData.push({
-          name: 'All Others',
+          name: "All Others",
           value: +(100 - totalValue).toFixed(2),
-          id: 'all-others',
+          id: "all-others",
         });
         totalValue = 100;
       }
       // Hide 'All Others' if its value is 100
       payloadData = payloadData.filter(
-        item => !(item.name === 'All Others' && item.value === 100)
+        (item) => !(item.name === "All Others" && item.value === 100)
       );
       if (payloadData.length > 6) {
-        toast.error('Maximum of 6 states can be selected');
+        toast.error("Maximum of 6 states can be selected");
         return;
       }
       const payload = {
         title: serviceChartTitle,
         description: serviceChartDescription,
-        type: 'pie',
+        type: "pie",
         data: payloadData,
       };
       const response = await createInsightChart(payload).unwrap();
       if (response.success) {
-        toast.success('Pie chart data saved successfully!');
+        toast.success("Pie chart data saved successfully!");
         setIsEditingServices(false);
       } else {
-        toast.error(response.message || 'Failed to save pie chart data');
+        toast.error(response.message || "Failed to save pie chart data");
       }
     } catch (error) {
-      console.error('Error saving pie chart data:', error);
-      toast.error(error?.data?.message || 'Something went wrong!');
+      console.error("Error saving pie chart data:", error);
+      toast.error(error?.data?.message || "Something went wrong!");
     }
   };
 
@@ -595,20 +598,29 @@ const InsightsPage = () => {
             </div>
           )}
 
-          {/* Footer textarea below months */}
-          {isEditingChart ? (
-            <Input.TextArea
-              value={chartFooter}
-              onChange={(e) => setChartFooter(e.target.value)}
-              placeholder="Enter chart footer (e.g., Source: CDC, 2024)"
-              className="mb-4"
-              rows={2}
-            />
-          ) : (
-            chartFooter && (
-              <div className="text-xs text-gray-500 mb-4">{chartFooter}</div>
-            )
-          )}
+          <div className="my-10 mb-28">
+            {/* Footer textarea below months */}
+            {isEditingChart ? (
+              <JoditEditor
+                value={chartFooter}
+                onBlur={(newContent) => setChartFooter(newContent)}
+                config={{
+                  readonly: false,
+                  height: 200,
+                  toolbarButtonSize: "small",
+                  placeholder: "Enter chart footer (e.g., Source: CDC, 2024)",
+                }}
+                className="mb-4"
+              />
+            ) : (
+              chartFooter && (
+                <div
+                  className="text-xs text-gray-500 mb-4"
+                  dangerouslySetInnerHTML={{ __html: chartFooter }}
+                />
+              )
+            )}
+          </div>
 
           <div className="flex justify-end mt-4">
             <Button

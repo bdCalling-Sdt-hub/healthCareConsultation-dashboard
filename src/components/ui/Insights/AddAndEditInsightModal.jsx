@@ -7,12 +7,19 @@ import {
 } from "../../../redux/apiSlices/insightsSlice";
 import { getImageUrl } from "../../../utils/getImageUrl";
 
-const InsightModal = ({ visible, onClose, initialData }) => {
+const InsightModal = ({
+  isModalVisible,
+  setIsModalVisible,
+  editingInsight,
+  onClose,
+}) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     image: null,
   });
+
+  const initialData = editingInsight || null;
 
   // Add useEffect to update form data when initialData changes
   useEffect(() => {
@@ -97,7 +104,7 @@ const InsightModal = ({ visible, onClose, initialData }) => {
           description: "",
           image: null,
         });
-        onClose();
+        setIsModalVisible(false);
       }
     } catch (error) {
       console.error("Operation failed:", error);
@@ -108,8 +115,8 @@ const InsightModal = ({ visible, onClose, initialData }) => {
   return (
     <Modal
       title={initialData ? "Edit Insight" : "Add Insight"}
-      open={visible}
-      onCancel={onClose}
+      open={isModalVisible}
+      onCancel={() => setIsModalVisible(false)}
       footer={null}
       width={800}
     >
