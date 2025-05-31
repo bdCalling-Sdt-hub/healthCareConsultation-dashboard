@@ -90,6 +90,7 @@ export const api = createApi({
     "Insights",
     "notification",
     "challenges",
+    "PageDescriptions",
   ],
   endpoints: () => ({}),
 });

@@ -59,13 +59,35 @@ const termsAndConditionSlice = api.injectEndpoints({
         };
       },
     }),
+
+    editPageDescription: builder.mutation({
+      query: (data) => {
+        return {
+          url: `/public/page-description`,
+          method: "POST",
+          body: data,
+        };
+      },
+      invalidatesTags: ["PageDescriptions"],
+    }),
+
+    getPageDescriptions: builder.query({
+      query: () => {
+        return {
+          url: `/public/page-description/get`,
+          method: "GET",
+        };
+      },
+      providesTags: ["PageDescriptions"],
+    }),
   }),
 });
 
 export const {
   useTermsAndConditionQuery,
   useUpdateTermsAndConditionsMutation,
-
+  useEditPageDescriptionMutation,
+  useGetPageDescriptionsQuery,
   useCreateAndUpdateFooterItemsMutation,
   useGetFooterItemsQuery,
 } = termsAndConditionSlice;
