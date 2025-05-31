@@ -22,7 +22,7 @@ const PageDescription = () => {
     );
   }
 
-  const pageDescriptions = pageDescription.data;
+  const pageDescriptions = pageDescription?.data;
   // console.log(pageDescriptions);
 
   const onFinish = async (values) => {
