@@ -193,7 +193,7 @@ const InsightsPage = () => {
 
   const handleGrowthDataChange = (index, value) => {
     const newData = [...growthData];
-    newData[index].value = parseInt(value) || 0;
+    newData[index].value = parseFloat(value) || 0;
     setGrowthData(newData);
   };
 
@@ -215,7 +215,7 @@ const InsightsPage = () => {
 
     const newMonth = {
       name: `${newMonthName} ${newMonthYear}`,
-      value: 0,
+      value: 0.0,
     };
 
     setGrowthData([...growthData, newMonth]);
@@ -360,37 +360,16 @@ const InsightsPage = () => {
 
   const handleSaveServiceData = async () => {
     try {
-      let payloadData = [...serviceData];
-      // Remove any existing 'All Others' before calculation
-      payloadData = payloadData.filter((item) => item.name !== "All Others");
-      let totalValue = payloadData.reduce(
-        (total, item) => total + (parseFloat(item.value) || 0),
-        0
-      );
-      // If total is less than 100, add 'All Others'
-      if (totalValue < 100) {
-        payloadData.push({
-          name: "All Others",
-          value: +(100 - totalValue).toFixed(2),
-          id: "all-others",
-        });
-        totalValue = 100;
-      }
-      // Hide 'All Others' if its value is 100
-      payloadData = payloadData.filter(
-        (item) => !(item.name === "All Others" && item.value === 100)
-      );
-      if (payloadData.length > 6) {
-        toast.error("Maximum of 6 states can be selected");
-        return;
-      }
+      // Simply use the serviceData as is
       const payload = {
         title: serviceChartTitle,
         description: serviceChartDescription,
         type: "pie",
-        data: payloadData,
+        data: serviceData,
       };
+
       const response = await createInsightChart(payload).unwrap();
+
       if (response.success) {
         toast.success("Pie chart data saved successfully!");
         setIsEditingServices(false);
@@ -576,12 +555,12 @@ const InsightsPage = () => {
                 >
                   <Input
                     type="number"
+                    step="0.01"
                     value={item.value}
                     onChange={(e) =>
                       handleGrowthDataChange(index, e.target.value)
                     }
                     disabled={!isEditingChart}
-                    placeholder="Enter value"
                   />
                 </Form.Item>
               </div>
@@ -678,7 +657,8 @@ const InsightsPage = () => {
               <h3 className="text-lg font-medium mb-3">Add New State</h3>
               <p className="text-sm text-gray-500 mb-3">
                 Select up to 6 states to display in the chart.{" "}
-                {serviceData.length}/6 states selected.
+                {serviceData.length}/6 states selected. Values can be any
+                number.
               </p>
               <div className="flex flex-wrap gap-4 items-end">
                 <div className="w-64">
@@ -692,7 +672,7 @@ const InsightsPage = () => {
                     onChange={(value) => setSelectedService(value)}
                     disabled={serviceData.length >= 6}
                   >
-                    {usaStates.map((state) => {
+                    {usaStates?.map((state) => {
                       // Check if state is already selected
                       const isSelected = serviceData.some(
                         (item) => item.name === state
